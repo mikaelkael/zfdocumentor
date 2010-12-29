@@ -18,7 +18,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:fo="http://www.w3.org/1999/XSL/Format" version='1.0'>
   <xsl:import href="@DOCBOOK_XSL@"/>
-  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param></xsl:param>
+  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param>
   <xsl:param name="html.stylesheet">'../../styles/docbook.css'</xsl:param>
   <xsl:param name="html.stylesheet.type">'text/css'</xsl:param>
   <xsl:param name="toc.section.depth">3</xsl:param>
