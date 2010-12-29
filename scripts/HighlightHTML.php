@@ -150,6 +150,7 @@ class HighlightHTML
 	    }
 
             $text = file_get_contents($file->getPathName());
+	    $text = str_replace('class="programlisting"', 'class="programlisting brush: php"', $text);
             $title   = 'Zend Framework ' . self::_getZfVersion() . ' - ' . self::_getSubstring($text, '<title>', '</title>', false, false);
 
             $content = self::_getSubstring($text, '<div class="part"', '<div class="navfooter">', true, false);
