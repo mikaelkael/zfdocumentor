@@ -139,6 +139,7 @@ class HighlightHTML
         $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang);
         $filter = new HTML_Filter($dir);
         $template = file_get_contents(dirname(dirname(__FILE__)) . '/page.html.in');
+	$svnRevision = trim(file_get_contents(dirname(dirname(__FILE__)) . '/temp/svn_rev'));
         foreach ($filter as $file) {
             $title   = '';
             $content = '';
@@ -179,7 +180,7 @@ class HighlightHTML
             $zfVersion = implode('.', array_slice(explode('.', Zend_Version::VERSION), 0, 2));;
             $text =  str_replace(
               array('{title}', '{content}', '{editions}', '{prev}', '{next}', '{version}', '{revsvn}', '{lang}', '{shortVersion}'),
-              array($title, $content, self::$_versionBar, $prev, $next, self::_getZfVersion(), 12345, self::$_lang, $zfVersion),
+              array($title, $content, self::$_versionBar, $prev, $next, self::_getZfVersion(), $svnRevision, self::$_lang, $zfVersion),
               $template
             );
 
