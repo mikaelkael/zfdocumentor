@@ -4,7 +4,7 @@
   <title>{title}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link type="text/css" rel="stylesheet" href="../../styles/shCoreMidnight.css"/>
-  <link rel="stylesheet" href="../../styles/docbook.css" type="text/css"></link>
+  <link rel="stylesheet" href="../../styles/zfdocumentor.css" type="text/css"></link>
   <meta name="generator" content="zfdocumentor - https://github.com/mikaelkael/zfdocumentor" />
   <meta name="author" content="Mickael Perraud" />
 </head>
@@ -51,29 +51,7 @@
 <script src="../../scripts/jquery-1.4.4.min.js"></script>
 <script type="text/javascript" src="../../scripts/shCore.js"></script>
 <script type="text/javascript" src="../../scripts/shAutoloader.js"></script>
-<script type="text/javascript">
-SyntaxHighlighter.autoloader(
-  'plain text txt ini apache dos dosini yaml output lighttpd json conf ../../scripts/shBrushPlain.js',
-  'js jscript javascript  ../../scripts/shBrushJScript.js',
-  'php                    ../../scripts/shBrushPhp.js',
-  'bash shell sh          ../../scripts/shBrushBash.js',
-  'sql SQL querystring    ../../scripts/shBrushSql.js',
-  'xml xhtml xslt html xhtml ../../scripts/shBrushXml.js',
-  'as ActionScript        ../../scripts/shBrushAS3.js',
-  'java                   ../../scripts/shBrushJava.js',
-  'css                    ../../scripts/shBrushCss.js'
-);
-SyntaxHighlighter.all();
-$(".version img").click(function(){
-  window.location=$(this).parent().parent().attr('href') + $(this).attr('title') + '/index.html';
-  return false;
-});
-$(".version").click(function(){
-  window.location=$(this).attr('href') + 'en/index.html';
-  return false;
-});
-$(function() {$(".col2").load('toc.html');});
-</script>
+<script type="text/javascript" src="../../scripts/zfdocumentor.js"></script>
 </body>
 </html>
 
