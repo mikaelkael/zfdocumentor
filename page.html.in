@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>{title}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link type="text/css" rel="stylesheet" href="../../styles/shCoreMidnight.css"/>
+  <link rel="stylesheet" href="../../styles/docbook.css" type="text/css"></link>
+  <meta name="generator" content="zfdocumentor - https://github.com/mikaelkael/zfdocumentor" />
+  <meta name="author" content="Mickael Perraud" />
+</head>
+<body>
+
+<div id="header">
+  <h1>Zend Framework {version} Manual</h1>
+
+  <form action="../../../search.php" id="searchZf">
+    <input type="hidden" name="zf_version" value="{shortVersion}" />
+    <input type="hidden" name="lang" value="{lang}" />
+    <input type="text" id="query_search" name="query_search" value="Search..."  onfocus="javascript:if(this.value=='Search...') {this.value=''}" onblur="javascript:if(this.value=='') {this.value='Search...'}" />
+  </form>
+  
+  <ul>
+{editions}
+  </ul>
+</div>
+<div class="colmask leftmenu">
+  <div class="colleft">
+    <div class="col1">
+      <table border="0" width="100%">
+        <tr>
+          <td align="left">{prev}</td>
+          <td align="right">{next}</td>
+        </tr>
+      </table>
+{content}
+      <table border="0" width="100%">
+        <tr>
+          <td align="left">{prev}</td>
+          <td align="right">{next}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="col2">
+	<img src="../../images/ajax-loader.gif" alt="Loading..." />
+    </div>
+  </div>
+</div>
+<div id="footer">
+  <p><a href="appendixes.copyright.html">Copyright</a> &copy; 2005-2010 <a href="http://zend.com/"> Zend Technologies Inc</a> (compiled by <a href="http://mikaelkael.fr">mikaelkael</a> - SVN {revsvn}).</p>
+</div>
+<script src="../../scripts/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="../../scripts/shCore.js"></script>
+<script type="text/javascript" src="../../scripts/shAutoloader.js"></script>
+<script type="text/javascript">
+SyntaxHighlighter.autoloader(
+  'plain text txt ini apache dos dosini yaml output lighttpd json conf ../../scripts/shBrushPlain.js',
+  'js jscript javascript  ../../scripts/shBrushJScript.js',
+  'php                    ../../scripts/shBrushPhp.js',
+  'bash shell sh          ../../scripts/shBrushBash.js',
+  'sql SQL querystring    ../../scripts/shBrushSql.js',
+  'xml xhtml xslt html xhtml ../../scripts/shBrushXml.js',
+  'as ActionScript        ../../scripts/shBrushAS3.js',
+  'java                   ../../scripts/shBrushJava.js',
+  'css                    ../../scripts/shBrushCss.js'
+);
+SyntaxHighlighter.all();
+$(".version img").click(function(){
+  window.location=$(this).parent().parent().attr('href') + $(this).attr('title') + '/index.html';
+  return false;
+});
+$(".version").click(function(){
+  window.location=$(this).attr('href') + 'en/index.html';
+  return false;
+});
+$(function() {$(".col2").load('toc.html');});
+</script>
+</body>
+</html>
+

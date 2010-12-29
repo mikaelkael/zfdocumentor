@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+<!--
+# ZFDocumentor
+#
+# LICENSE
+#
+# This source file is subject to the new BSD license that is bundled
+# with this package in the file LICENSE.txt.
+# If you did not receive a copy of the license and are unable to
+# obtain it through the world-wide-web, please send an email
+# to perraud.mickael@orange.fr so we can send you a copy immediately.
+#
+# @category  Documentation
+# @author    Mickael Perraud <mikaelkael@php.net>
+# @copyright   Copyright (c) 2010-2011 Mickael Perraud <perraud.mickael@orange.fr>
+# @license    http://framework.zend.com/license/new-bsd     New BSD License
+-->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:fo="http://www.w3.org/1999/XSL/Format" version='1.0'>
+  <xsl:import href="@DOCBOOK_XSL@"/>
+  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param></xsl:param>
+  <xsl:param name="html.stylesheet">'../../styles/docbook.css'</xsl:param>
+  <xsl:param name="html.stylesheet.type">'text/css'</xsl:param>
+  <xsl:param name="toc.section.depth">3</xsl:param>
+  <xsl:param name="use.id.function">1</xsl:param>
+  <xsl:param name="generate.toc">book toc</xsl:param>
+  <xsl:param name="toc.section.depth">1</xsl:param>
+  <xsl:param name="toc.max.depth">3</xsl:param>
+  <xsl:param name="use.id.as.filename">1</xsl:param>
+  <xsl:param name="highlight.source">1</xsl:param>
+  <xsl:param name="admon.graphics">1</xsl:param>
+  <xsl:param name="admon.graphics.extension">.png</xsl:param>
+  <xsl:param name="admon.graphics.path">../../images/</xsl:param>
+  <xsl:param name="label.from.part">1</xsl:param>
+  <xsl:template match="programlisting[@language != '']" mode="class.value">programlisting brush: <xsl:value-of select="@language"/></xsl:template>
+</xsl:stylesheet>
