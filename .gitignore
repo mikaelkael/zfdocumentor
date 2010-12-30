@@ -3,3 +3,4 @@ autom4te.cache/*
 config*
 temp/*
 Makefile
+library
