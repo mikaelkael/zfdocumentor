@@ -17,6 +17,9 @@
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/pear');
+require_once 'Text/LanguageDetect.php';
+
 class HTML_Filter extends FilterIterator
 {
 
@@ -57,8 +60,7 @@ class HighlightHTML
         } else {
             die("Language '$lang' doesn't valid (2)");
         }
-        $toc = self::_getSubstring(file_get_contents(dirname(dirname(__FILE__)) . '/output/' . $type . '/' . $version . '/' . $lang . '/index.html'), '<dl>', '</dl>', true, true, true);
-	file_put_contents(dirname(dirname(__FILE__)) . '/output/' . $type . '/' . $version . '/' . $lang . '/toc.html', $toc);
+        self::generateToc();
         self::$_versionBar = self::generateVersion();
         self::highlightAllFile();
         /*self::insertImageLink();
@@ -66,6 +68,57 @@ class HighlightHTML
             self::removeTocFirstNode();
             self::changeChmTitle();
         }*/
+    }
+    
+    public static function generateToc()
+    {
+        $directory = dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang;
+        $rawToc = file_get_contents($directory . '/index.html');
+        if (function_exists('tidy_repair_string')) {
+            $rawToc = tidy_repair_string(
+              $rawToc,
+              array(
+                'indent'       => TRUE,
+                'output-xhtml' => TRUE,
+                'wrap'         => 0
+              ),
+              'utf8'
+            );
+        }
+        $rawToc = self::_getSubstring($rawToc, '<dl>', '</dl>', true, true, true);
+        $rawToc = file_get_contents($directory . '/toc.html');
+        $matches = array();
+        preg_match_all('$(<span class="(.*?)"><a href="(.*?)">)(.*?</a>)</span>$sm', $rawToc, $matches);
+        $l = new Text_LanguageDetect();
+        $mapping = array('english' => 'en', 'german' => 'de', 'french' => 'fr', 'japanese' => 'ja', 'spanish' => 'es', 'portuguese' => 'pt-br');
+        for ($i = 0 ; $i < count($matches[0]) ; $i++) {
+            if (in_array($matches[2][$i], array('sect1', 'sect2'))) {
+                $flag = 'en';
+                if (self::$_lang != 'en') {
+                    // Analyse file
+                    $file = explode('#', $matches[3][$i]);
+                    $text = file_get_contents($directory . '/' . $file[0]);
+                    $para = '';
+                    preg_match_all('#<p>(.*?)</p>#sm', $text, $para);
+                    $para = substr(implode(' ', array_map('strip_tags', $para[1])), 0, 9000);
+                    $result = $l->detect($para, 4);
+                    if (PEAR::isError($result)) {                        
+                        echo 'Language detection ' . $file[0] . ': ' . $result->getMessage() . "\n";
+                    } else {
+                        $result = array_keys($result);
+                        if (array_key_exists($result[0], $mapping)) {
+                            $flag = $mapping[$result[0]];
+                        }
+                    }
+                }
+                if ($flag != self::$_lang) {
+                    $flag = 'en';
+                }
+                // Add flag
+                $rawToc = str_replace($matches[0][$i], $matches[1][$i] . '<img src="/images/' . $flag . '.png"/>' . $matches[4][$i], $rawToc);
+            }
+        }
+        file_put_contents($directory . '/toc.html', $rawToc);
     }
     
     public static function generateVersion()
@@ -139,19 +192,19 @@ class HighlightHTML
         $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang);
         $filter = new HTML_Filter($dir);
         $template = file_get_contents(dirname(dirname(__FILE__)) . '/page.html.in');
-	$svnRevision = trim(file_get_contents(dirname(dirname(__FILE__)) . '/temp/svn_rev'));
+        $svnRevision = trim(file_get_contents(dirname(dirname(__FILE__)) . '/temp/svn_rev'));
         foreach ($filter as $file) {
             $title   = '';
             $content = '';
             $prev    = '';
             $next    = '';
 
-	    if ($file->getFileName() == 'toc.html') {
-	        continue;
-	    }
+            if ($file->getFileName() == 'toc.html') {
+                continue;
+            }
 
             $text = file_get_contents($file->getPathName());
-	    $text = str_replace('class="programlisting"', 'class="programlisting brush: php"', $text);
+            $text = str_replace('class="programlisting"', 'class="programlisting brush: php"', $text);
             $title   = 'Zend Framework ' . self::_getZfVersion() . ' - ' . self::_getSubstring($text, '<title>', '</title>', false, false);
 
             $content = self::_getSubstring($text, '<div class="part"', '<div class="navfooter">', true, false);
@@ -196,14 +249,6 @@ class HighlightHTML
                 );
             }
             file_put_contents($file->getPathName(), $text);
-
-            /*$text = file_get_contents($file->getPathName());
-            $text = preg_replace_callback('/(<pre class="programlisting php">)(.*?)(<\/pre>)/s',
-                    'HighlightHTML::_highlight',
-                    $text);
-            $text = str_replace('<title>', '<title>Zend Framework ' . self::_getZfVersion() . '.x - ', $text);
-            //$text = self::insertJquery($text);
-            file_put_contents($file->getPathName(), $text);*/
         }
     }
 
