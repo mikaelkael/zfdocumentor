@@ -3,8 +3,8 @@
 <head>
   <title>{title}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <link type="text/css" rel="stylesheet" href="../../styles/shCoreMidnight.css"/>
-  <link rel="stylesheet" href="../../styles/zfdocumentor.css" type="text/css"></link>
+  <link type="text/css" rel="stylesheet" href="/styles/shCoreMidnight.css"/>
+  <link rel="stylesheet" href="/styles/zfdocumentor.css" type="text/css"></link>
   <meta name="generator" content="zfdocumentor - https://github.com/mikaelkael/zfdocumentor" />
   <meta name="author" content="Mickael Perraud" />
 </head>
@@ -13,7 +13,7 @@
 <div id="header">
   <h1>Zend Framework {version} Manual</h1>
 
-  <form action="../../../search.php" id="searchZf">
+  <form action="/search.php" id="searchZf">
     <input type="hidden" name="zf_version" value="{shortVersion}" />
     <input type="hidden" name="lang" value="{lang}" />
     <input type="text" id="query_search" name="query_search" value="Search..."  onfocus="javascript:if(this.value=='Search...') {this.value=''}" onblur="javascript:if(this.value=='') {this.value='Search...'}" />
@@ -41,18 +41,27 @@
       </table>
     </div>
     <div class="col2">
-	<img src="../../images/ajax-loader.gif" alt="Loading..." />
+	<img src="/images/ajax-loader.gif" alt="Loading..." />
     </div>
   </div>
 </div>
 <div id="footer">
   <p><a href="appendixes.copyright.html">Copyright</a> &copy; 2005-2010 <a href="http://zend.com/"> Zend Technologies Inc</a> (compiled by <a href="http://mikaelkael.fr">mikaelkael</a> with <a href="https://github.com/mikaelkael/zfdocumentor">ZFDocumentor</a> - SVN {revsvn}).</p>
 </div>
-<script src="../../scripts/jquery-1.4.4.min.js"></script>
-<script type="text/javascript" src="../../scripts/XRegExp.js"></script>
-<script type="text/javascript" src="../../scripts/shCore.js"></script>
-<script type="text/javascript" src="../../scripts/shAutoloader.js"></script>
-<script type="text/javascript" src="../../scripts/zfdocumentor.js"></script>
+<script src="/scripts/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="/scripts/zfdocumentor.js"></script>
+<script type="text/javascript" src="/scripts/XRegExp.js"></script>
+<script type="text/javascript" src="/scripts/shCore.js"></script>
+<script type="text/javascript" src="/scripts/shBrushPlain.js"></script>
+<script type="text/javascript" src="/scripts/shBrushJScript.js"></script>
+<script type="text/javascript" src="/scripts/shBrushPhp.js"></script>
+<script type="text/javascript" src="/scripts/shBrushBash.js"></script>
+<script type="text/javascript" src="/scripts/shBrushSql.js"></script>
+<script type="text/javascript" src="/scripts/shBrushXml.js"></script>
+<script type="text/javascript" src="/scripts/shBrushAS3.js"></script>
+<script type="text/javascript" src="/scripts/shBrushJava.js"></script>
+<script type="text/javascript" src="/scripts/shBrushCss.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
 </body>
 </html>
 
