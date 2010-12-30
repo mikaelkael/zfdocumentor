@@ -19,7 +19,6 @@
 date
 export LANG=en_US.UTF8
 echo Cleaning
-make clean
 make -e lucene ZF_LANG=en ZF_VERSION=1.11
 make -e lucene ZF_LANG=de ZF_VERSION=1.11
 make -e lucene ZF_LANG=es ZF_VERSION=1.11
