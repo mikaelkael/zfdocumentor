@@ -93,24 +93,50 @@ $(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/e
 
 rev-svn:
 	@[ -d temp ] || mkdir temp
-	@export LANG="en_US.UTF-8"
+	@export LANG=en_US.UTF8
 	@svn info ../standard/branches/release-$(ZF_VERSION)/documentation/manual/$(ZF_LANG) | grep '^Last Changed Rev' | sed -e 's!Last Changed Rev: !!m' -e 's!(\n)!!' > ./temp/svn_rev \
 	    || @echo "Impossible to read svn revision"
 
 # Build the docs in HTML format
+website: html highlight zipdoc
+
 html: $(MANUAL_XML) $(HTML_XSL)
-	@rm -Rf output/html/$(ZF_VERSION)/$(ZF_LANG)/
+	rm -Rf output/html/$(ZF_VERSION)/$(ZF_LANG)/
+	rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/
 	@echo "Rendering the whole manual as html..."
 	@$(XSLTPROC) --xinclude --output output/html/$(ZF_VERSION)/$(ZF_LANG)/index.html ./temp/$(HTML_XSL) ./temp/manual.xml
 	@mkdir output/html/$(ZF_VERSION)/$(ZF_LANG)/figures
-	@[ -d output/html/images ] || mkdir  output/html/images
-	@[ -d output/html/scripts ] || mkdir  output/html/scripts
-	@[ -d output/html/styles ] || mkdir  output/html/styles
+	@[ -d output/website/$(ZF_VERSION)/$(ZF_LANG) ] || mkdir -p output/website/$(ZF_VERSION)/$(ZF_LANG)
+	@mkdir output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
+	@[ -d output/website/images ] || mkdir  output/website/images
+	@[ -d output/website/scripts] || mkdir  output/website/scripts
+	@[ -d output/website/styles ] || mkdir  output/website/styles
 	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/html/$(ZF_VERSION)/$(ZF_LANG)/figures
-	@cp -f images/*.* output/html/images
-	@cp -f styles/*.* output/html/styles
-	@cp -f javascripts/*.* output/html/scripts
-	@php -f scripts/HighlightHTML.php html $(ZF_VERSION) $(ZF_LANG)
+	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
+	@cp -f images/*.* output/website/images
+	@cp -f styles/*.* output/website/styles
+	@cp -f javascripts/*.* output/website/scripts
+
+highlight:
+	@php -f scripts/HighlightHTML.php website $(ZF_VERSION) $(ZF_LANG)
+
+zipdoc:
+	@rm -Rf temp/zfdoc
+	@mkdir temp/zfdoc
+	@mkdir  temp/zfdoc/images
+	@mkdir  temp/zfdoc/scripts
+	@mkdir  temp/zfdoc/styles
+	@cp -R output/website/$(ZF_VERSION)/$(ZF_LANG)/* temp/zfdoc
+	@cp -R output/html/$(ZF_VERSION)/$(ZF_LANG)/figures/*.* temp/zfdoc/figures
+	@cp -f images/*.* temp/zfdoc/images
+	@cp -f styles/*.* temp/zfdoc/styles
+	@cp -f javascripts/*.* temp/zfdoc/scripts
+	@(cd temp; find -name '*.html' -print0 | xargs -0 sed --regexp-extended --in-place 's/src="\/images\//src="images\//;s/href="\/styles\//href="styles\//;s/src="\/scripts\//src="scripts\//')
+	@echo '#alternateDoc{display:none;}' >> temp/zfdoc/styles/zfdocumentor.css
+	@echo '.editions{display:none;}' >> temp/zfdoc/styles/zfdocumentor.css
+	@echo '#searchZf{display:none;}' >> temp/zfdoc/styles/zfdocumentor.css
+	@echo '#header{height:60px;}' >> temp/zfdoc/styles/zfdocumentor.css
+	@(cd temp ; zip -q -r ../docs/Zend_Framework_$(ZF_VERSION).x_$(ZF_LANG).zip zfdoc)
 
 lucene:
 	@php -f scripts/IndexLucene.php $(ZF_VERSION) $(ZF_LANG)

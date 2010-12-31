@@ -4,3 +4,4 @@ config*
 temp/*
 Makefile
 library
+docs/*

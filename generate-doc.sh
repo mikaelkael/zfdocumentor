@@ -57,5 +57,5 @@ make -e html ZF_LANG=de ZF_VERSION=1.0
 make -e html ZF_LANG=fr ZF_VERSION=1.0
 make -e html ZF_LANG=ja ZF_VERSION=1.0
 cd output
-tar -czf html.tar.gz html
+tar -czf html.tar.gz website
 date

@@ -18,8 +18,14 @@
     <input type="hidden" name="lang" value="{lang}" />
     <input type="text" id="query_search" name="query_search" value="Search..."  onfocus="javascript:if(this.value=='Search...') {this.value=''}" onblur="javascript:if(this.value=='') {this.value='Search...'}" />
   </form>
+
+  <div id="alternateDoc" style="position: absolute;top: 10px; right:10px;">
+    <a href="/docs/Zend_Framework_{shortVersion}.x_{lang}.zip"><img src="/images/zip.png" alt="Downloadable version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.pdf"><img src="/images/pdf.png" alt="PDF version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.chm"><img src="/images/chm.png" alt="CHM version of this documentation" /></a>
+  </div>
   
-  <ul>
+  <ul class="editions">
 {editions}
   </ul>
 </div>

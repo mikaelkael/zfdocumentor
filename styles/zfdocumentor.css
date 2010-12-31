@@ -337,6 +337,10 @@ body div.colleft div.col2 a {
   border-bottom: 1px dotted #ccc;  
 }
 
+body div.colleft div.col2 a img {
+	padding-right: 5px;
+}
+
 body div.colleft div.col2 span.chapter a {
   display: block;
   padding: 2px 3px;
@@ -448,7 +452,7 @@ body div.colleft div.col1 div.sect1 div.example div.example-contents pre code,
 
 #searchZf {
   position: absolute;
-  left: 750px;
+  left: 650px;
   top: 20px;
 }
 #query_search {

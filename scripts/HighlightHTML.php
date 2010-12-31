@@ -32,7 +32,7 @@ class HTML_Filter extends FilterIterator
 class HighlightHTML
 {
 
-    private static $_type = 'html';
+    private static $_type = 'website';
     private static $_lang = 'en';
     private static $_version = '1.11';
     private static $_versionBar = null;
@@ -44,17 +44,17 @@ class HighlightHTML
         } else {
             die("Version '$version' doesn't valid");
         }
-        if (in_array($type, array('html', 'htmlhelp'))) {
+        if (in_array($type, array('website', 'htmlhelp'))) {
             self::$_type = $type;
-            if (!file_exists(dirname(dirname(__FILE__)) . '/output/' . $type)) {
-                die("Type '$type' doesn't exist (1)");
+            if (!file_exists(dirname(dirname(__FILE__)) . '/output/html')) {
+                die("HTML is not generated (1)");
             }
         } else {
             die("Type '$type' doesn't valid (2)");
         }
         if (preg_match('/^([a-z]{2}(\-[a-z]{2})?)$/i', $lang, $matches)) {
             self::$_lang = strtolower($lang);
-            if (!file_exists(dirname(dirname(__FILE__)) . '/output/' . $type . '/' . $version . '/' . $lang)) {
+            if (!file_exists(dirname(dirname(__FILE__)) . '/output/html/' . $version . '/' . $lang)) {
                 die("Language '$lang' doesn't exist (1)");
             }
         } else {
@@ -63,16 +63,17 @@ class HighlightHTML
         self::generateToc();
         self::$_versionBar = self::generateVersion();
         self::highlightAllFile();
-        /*self::insertImageLink();
+        
         if (substr($lang, 0, 8) == 'htmlhelp') {
+            self::insertImageLink();
             self::removeTocFirstNode();
             self::changeChmTitle();
-        }*/
+        }
     }
     
     public static function generateToc()
     {
-        $directory = dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang;
+        $directory = dirname(dirname(__FILE__)) . '/output/html/' . self::$_version . '/' . self::$_lang;
         $rawToc = file_get_contents($directory . '/index.html');
         if (function_exists('tidy_repair_string')) {
             $rawToc = tidy_repair_string(
@@ -86,7 +87,6 @@ class HighlightHTML
             );
         }
         $rawToc = self::_getSubstring($rawToc, '<dl>', '</dl>', true, true, true);
-        $rawToc = file_get_contents($directory . '/toc.html');
         $matches = array();
         preg_match_all('$(<span class="(.*?)"><a href="(.*?)">)(.*?</a>)</span>$sm', $rawToc, $matches);
         $l = new Text_LanguageDetect();
@@ -118,6 +118,7 @@ class HighlightHTML
                 $rawToc = str_replace($matches[0][$i], $matches[1][$i] . '<img src="/images/' . $flag . '.png"/>' . $matches[4][$i], $rawToc);
             }
         }
+        $directory = dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang;
         file_put_contents($directory . '/toc.html', $rawToc);
     }
     
@@ -137,14 +138,14 @@ class HighlightHTML
 	    $img = '';
             foreach ($langs as $l) {
                 $img .= sprintf(
-                  '<img src="../../images/%s.png" title="%s" alt="%s">' . PHP_EOL,
+                  '<img src="/images/%s.png" title="%s" alt="%s">' . PHP_EOL,
                   $l,
                   $l,
                   $l
                 );
             }
 	    $bar .= sprintf(
-		'<li><a href="../../%s/" class="version%s">ZF %s <span>%s</span></a></li>' . PHP_EOL,
+		'<li><a href="/%s/" class="version%s">ZF %s <span>%s</span></a></li>' . PHP_EOL,
 		$num,
 		($num == self::$_version ? ' active' : ''),
 		$num,
@@ -189,7 +190,8 @@ class HighlightHTML
 
     public static function highlightAllFile()
     {
-        $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang);
+        $directory = dirname(dirname(__FILE__)) . '/output/' . self::$_type . '/' . self::$_version . '/' . self::$_lang;
+        $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/html/' . self::$_version . '/' . self::$_lang);
         $filter = new HTML_Filter($dir);
         $template = file_get_contents(dirname(dirname(__FILE__)) . '/page.html.in');
         $svnRevision = trim(file_get_contents(dirname(dirname(__FILE__)) . '/temp/svn_rev'));
@@ -230,10 +232,15 @@ class HighlightHTML
                 $next = '<a accesskey="n" href="' . $next . '"><img alt="Next" src="../../images/next.png" style="border:0" /></a>';
             }
 
-            $zfVersion = implode('.', array_slice(explode('.', Zend_Version::VERSION), 0, 2));;
+            $zfVersion = implode('.', array_slice(explode('.', Zend_Version::VERSION), 0, 2));
+            $alternateDoc = '';
+            if ($zfVersion == 1.0 || $zfVersion == 1.5 || $zfVersion == 1.6 || $zfVersion == 1.11) {
+                $alternateDoc = 'display:none;';
+            }
+
             $text =  str_replace(
-              array('{title}', '{content}', '{editions}', '{prev}', '{next}', '{version}', '{revsvn}', '{lang}', '{shortVersion}'),
-              array($title, $content, self::$_versionBar, $prev, $next, self::_getZfVersion(), $svnRevision, self::$_lang, $zfVersion),
+              array('{title}', '{content}', '{editions}', '{prev}', '{next}', '{version}', '{revsvn}', '{lang}', '{shortVersion}', '{alternateDoc}', '{LANG}'),
+              array($title, $content, self::$_versionBar, $prev, $next, self::_getZfVersion(), $svnRevision, self::$_lang, $zfVersion, $alternateDoc, strtoupper(self::$_lang)),
               $template
             );
 
@@ -248,7 +255,7 @@ class HighlightHTML
                   'utf8'
                 );
             }
-            file_put_contents($file->getPathName(), $text);
+            file_put_contents($directory . '/' . $file->getFileName(), $text);
         }
     }
 
@@ -283,32 +290,6 @@ class HighlightHTML
         $index = str_replace('Title=' . $matches[1], 'Title=ZF ' . $zf . '.x - ' . $filtered, $index);
         $index = str_replace('Main="' . $matches[1], 'Main="ZF ' . $zf . '.x - ' . $filtered, $index);
         file_put_contents($file_name, $index);
-    }
-
-    private static function _highlight($text)
-    {
-        $code = $text[2];
-        // Replace element create by html compilation
-        $code = str_replace(array('&gt;' , '&lt;'), array('>' , '<'), $code);
-        // Highlight with tag < ?php since they are not present
-        $code = highlight_string('<?php ' . $code, true);
-        // After highlight remove equivalent to < ?php but just the first one
-        $code = preg_replace(
-                "`\<span style\=\"color\: \#0000BB\"\>\&lt\;\?php\&nbsp\;<br />`",
-                '<span style="color: #0000BB">',
-                $code,
-                1);
-        // Since we are in a tag <code> all \n will create a new line,
-        // but we already have some <br/>:
-        $code = str_replace("\n", '', $code);
-        // In English manual, there is spaces between ]]> and </programlisting>,
-        // we remode it:
-        $code = preg_replace(
-                '/(<br \/>)(\&nbsp\;)*(<\/span><\/code>)/',
-                '$3',
-                $code);
-        $code = preg_replace('/(<br \/>)(\&nbsp\;)*(<\/span><\/span><\/code>)/', '$3', $code);
-        return $text[1] . $code . $text[3];
     }
 }
 
