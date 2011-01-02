@@ -17,6 +17,7 @@
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+date_default_timezone_set('Europe/Paris');
 set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/pear');
 require_once 'Text/LanguageDetect.php';
 
@@ -100,14 +101,20 @@ class HighlightHTML
                     $text = file_get_contents($directory . '/' . $file[0]);
                     $para = '';
                     preg_match_all('#<p>(.*?)</p>#sm', $text, $para);
-                    $para = substr(implode(' ', array_map('strip_tags', $para[1])), 0, 9000);
+                    $para = mb_substr(implode(' ', array_map('strip_tags', $para[1])), 0, 7000);
                     $result = $l->detect($para, 4);
                     if (PEAR::isError($result)) {                        
                         echo 'Language detection ' . $file[0] . ': ' . $result->getMessage() . "\n";
                     } else {
-                        $result = array_keys($result);
-                        if (array_key_exists($result[0], $mapping)) {
-                            $flag = $mapping[$result[0]];
+                        if (count($result)) {
+                            if (self::$_lang == 'ja' && (!isset($result['english']) || $result['english'] < 0.2)) {
+                                $flag = 'ja';
+                            } else {
+                                $result = array_keys($result);
+                                if (array_key_exists($result[0], $mapping)) {
+                                    $flag = $mapping[$result[0]];
+                                }
+                            }
                         }
                     }
                 }
@@ -194,6 +201,20 @@ class HighlightHTML
         $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/html/' . self::$_version . '/' . self::$_lang);
         $filter = new HTML_Filter($dir);
         $template = file_get_contents(dirname(dirname(__FILE__)) . '/page.html.in');
+        $stylesOrJs = array();
+        preg_match_all('#([a-zA-Z0-9]*)\.(css|js)#', $template, $stylesOrJs);
+        for ($i = 0 ; $i < count($stylesOrJs[0]) ; $i++) {
+            if ($stylesOrJs[2][$i] == 'css') {
+                if (file_exists('../styles/' . $stylesOrJs[0][$i])) {
+                    $template = str_replace($stylesOrJs[0][$i], $stylesOrJs[0][$i] . '?v=' . substr(sha1(filemtime('../styles/' . $stylesOrJs[0][$i])), 0, 7), $template);
+                }
+            }
+            if ($stylesOrJs[2][$i] == 'js') {
+                if (file_exists('../javascripts/' . $stylesOrJs[0][$i])) {
+                    $template = str_replace($stylesOrJs[0][$i], $stylesOrJs[0][$i] . '?v=' . substr(sha1(filemtime('../javascripts/' . $stylesOrJs[0][$i])), 0, 7), $template);
+                }
+            }
+        }
         $svnRevision = trim(file_get_contents(dirname(dirname(__FILE__)) . '/temp/svn_rev'));
         foreach ($filter as $file) {
             $title   = '';

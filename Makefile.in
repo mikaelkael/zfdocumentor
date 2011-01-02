@@ -101,17 +101,20 @@ rev-svn:
 website: html highlight zipdoc
 
 html: $(MANUAL_XML) $(HTML_XSL)
-	rm -Rf output/html/$(ZF_VERSION)/$(ZF_LANG)/
-	rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/
-	@echo "Rendering the whole manual as html..."
-	@$(XSLTPROC) --xinclude --output output/html/$(ZF_VERSION)/$(ZF_LANG)/index.html ./temp/$(HTML_XSL) ./temp/manual.xml
-	@mkdir output/html/$(ZF_VERSION)/$(ZF_LANG)/figures
+	@if [ -d output/html/$(ZF_VERSION)/$(ZF_LANG)/ ] ; then \
+	    echo "Rendering already done" ; \
+	else \
+	    rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/ ; \
+	    echo "Rendering the whole manual as html..." ; \
+	    $(XSLTPROC) --xinclude --output output/html/$(ZF_VERSION)/$(ZF_LANG)/index.html ./temp/$(HTML_XSL) ./temp/manual.xml ; \
+	    mkdir output/html/$(ZF_VERSION)/$(ZF_LANG)/figures ; \
+	    cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/html/$(ZF_VERSION)/$(ZF_LANG)/figures ; \
+	fi
 	@[ -d output/website/$(ZF_VERSION)/$(ZF_LANG) ] || mkdir -p output/website/$(ZF_VERSION)/$(ZF_LANG)
 	@mkdir output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
-	@[ -d output/website/images ] || mkdir  output/website/images
-	@[ -d output/website/scripts] || mkdir  output/website/scripts
-	@[ -d output/website/styles ] || mkdir  output/website/styles
-	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/html/$(ZF_VERSION)/$(ZF_LANG)/figures
+	@[ -d output/website/images  ] || mkdir  output/website/images
+	@[ -d output/website/scripts ] || mkdir  output/website/scripts
+	@[ -d output/website/styles  ] || mkdir  output/website/styles
 	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
 	@cp -f images/*.* output/website/images
 	@cp -f styles/*.* output/website/styles

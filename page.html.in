@@ -20,9 +20,9 @@
   </form>
 
   <div id="alternateDoc" style="position: absolute;top: 10px; right:10px;">
-    <a href="/docs/Zend_Framework_{shortVersion}.x_{lang}.zip"><img src="/images/zip.png" alt="Downloadable version of this documentation" /></a>
-    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.pdf"><img src="/images/pdf.png" alt="PDF version of this documentation" /></a>
-    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.chm"><img src="/images/chm.png" alt="CHM version of this documentation" /></a>
+    <a href="/docs/Zend_Framework_{shortVersion}.x_{lang}.zip"><img src="/images/zip.png" alt="Downloadable version of this documentation" title="Downloadable version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.pdf"><img src="/images/pdf.png" alt="PDF version of this documentation" title="PDF version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.chm"><img src="/images/chm.png" alt="CHM version of this documentation" title="CHM version of this documentation" /></a>
   </div>
   
   <ul class="editions">
@@ -68,6 +68,16 @@
 <script type="text/javascript" src="/scripts/shBrushJava.js"></script>
 <script type="text/javascript" src="/scripts/shBrushCss.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-15219015-2']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 </body>
 </html>
 

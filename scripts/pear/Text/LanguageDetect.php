@@ -216,8 +216,7 @@ class Text_LanguageDetect
         // checks if this has been installed properly
         } elseif ($this->_data_dir != '@' . 'data_dir' . '@') {
             // if the data dir was set by the PEAR installer, use that
-            return $this->_data_dir . '/' . $fname;
-
+            return dirname(dirname(dirname(__FILE__))) . '/data/' . $fname;
         } else {
             // assume this was just unpacked somewhere
             // try the local working directory if otherwise
