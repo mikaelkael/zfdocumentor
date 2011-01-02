@@ -238,10 +238,11 @@ check-full:
 
 # cleaning
 clean:
-	-rm -Rf ./output
+	-rm -Rf ./output/website
 	-rm -Rf ./temp
 
 cleanall: clean
+	-rm -Rf ./output
 	-rm -f config.* configure
 	-rm -rf autom4te.cache
 	-rm -f Makefile
