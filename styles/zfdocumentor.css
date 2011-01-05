@@ -343,7 +343,7 @@ body div.colleft div.col2 a img {
 
 body div.colleft div.col2 span.chapter a {
   display: block;
-  padding: 2px 3px;
+  padding: 0px 3px;
   margin: 2px 0px 3px -3px;
 }
 
@@ -367,7 +367,7 @@ body div.colleft div.col2 dl dt {
 }
 
 body div.colleft div.col2 dl dd dl dt {
-  margin: 0 0 5px -15px;
+  margin: 0 0 2px -15px;
 }
 body div.colleft div.col2 dl dd dl dd {
   margin-bottom: 5px;

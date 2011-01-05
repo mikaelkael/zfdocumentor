@@ -10,4 +10,15 @@ $(".version").click(function(){
   window.location=$(this).attr('href') + 'en/' + url;
   return false;
 });
-$(function() {$(".col2").load('toc.html');});
+$(function() {
+    $(".col2").load('toc.html', function() {
+        $(".col2 dl dl dl").toggle();
+        $(".col2 dl dl dl a").click(function (event) {
+            event.stopPropagation();
+        });
+        $(".col2 dl dt").click(function () {
+            $(this).next().children('dl').toggle();
+            return false;
+        });
+    });
+});
