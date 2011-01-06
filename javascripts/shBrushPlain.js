@@ -24,7 +24,7 @@
 	};
 
 	Brush.prototype	= new SyntaxHighlighter.Highlighter();
-	Brush.aliases	= ['text', 'plain', 'ini', 'apache', 'dos', 'dosini', 'yaml', 'output', 'lighttpd', 'json', 'conf'];
+	Brush.aliases	= ['text', 'txt', 'plain', 'ini', 'apache', 'dos', 'dosini', 'yaml', 'output', 'lighttpd', 'json', 'conf'];
 
 	SyntaxHighlighter.brushes.Plain = Brush;
 
