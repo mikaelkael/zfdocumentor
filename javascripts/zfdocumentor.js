@@ -20,5 +20,27 @@ $(function() {
             $(this).next().children('dl').toggle();
             return false;
         });
+        var url=window.location.pathname;
+        if (url.lastIndexOf('/') !=-1) {
+            firstpos = url.lastIndexOf('/')+1;
+            file = url.substring(firstpos);
+            toggled = false;
+            $("a[href*="+file+"]").each(function() {
+                if ($(this).parent().parent().parent().parent().parent().parent().get(0).tagName == 'DIV') {
+                    if (!toggled) {
+                        $(this).parent().parent().next().children('dl').toggle();
+                        toggled = true
+                    }
+                    $(this).addClass('active');
+                } else {
+                    if (!toggled) {
+                        $(this).parent().parent().parent().toggle();
+                        toggled = true
+                    }
+                    $(this).parent().parent().parent().parent().prev().children('span').children('a').addClass('active');
+                    $(this).addClass('active');
+                }
+            });
+        }
     });
 });

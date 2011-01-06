@@ -354,12 +354,12 @@ body div.colleft div.col2 a:hover {
   font-weight: bold;
 }
 
-body div.colleft div.col2 span.chapter a.active {
+body div.colleft div.col2 a.active {
   color: #000;
   font-weight: bold;
   background: none;
   border-bottom: 1px dotted #333;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 body div.colleft div.col2 dl dt {
