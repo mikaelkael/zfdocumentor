@@ -18,19 +18,22 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:fo="http://www.w3.org/1999/XSL/Format" version='1.0'>
   <xsl:import href="@DOCBOOK_XSL@"/>
-  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param>
-  <xsl:param name="html.stylesheet">'../../styles/docbook.css'</xsl:param>
-  <xsl:param name="html.stylesheet.type">'text/css'</xsl:param>
-  <xsl:param name="toc.section.depth">3</xsl:param>
-  <xsl:param name="use.id.function">1</xsl:param>
-  <xsl:param name="generate.toc">book toc</xsl:param>
-  <xsl:param name="toc.section.depth">1</xsl:param>
-  <xsl:param name="toc.max.depth">3</xsl:param>
-  <xsl:param name="use.id.as.filename">1</xsl:param>
-  <xsl:param name="highlight.source">1</xsl:param>
   <xsl:param name="admon.graphics">1</xsl:param>
   <xsl:param name="admon.graphics.extension">.png</xsl:param>
   <xsl:param name="admon.graphics.path">../../images/</xsl:param>
+  <xsl:param name="chunker.output.encoding">UTF-8</xsl:param>
+  <xsl:param name="generate.toc">book toc</xsl:param>
+  <xsl:param name="highlight.source">1</xsl:param>
+  <xsl:param name="html.stylesheet">'../../styles/docbook.css'</xsl:param>
+  <xsl:param name="html.stylesheet.type">'text/css'</xsl:param>
+  <xsl:param name="htmlhelp.chm" select="'Zend_Framework_@ZF_VERSION@_@ZF_LANG@.chm'"/>
+  <xsl:param name="htmlhelp.hhc.binary" select="0"/>
+  <xsl:param name="htmlhelp.hhc.folders.instead.books" select="0"/>
   <xsl:param name="label.from.part">1</xsl:param>
+  <xsl:param name="toc.max.depth">3</xsl:param>
+  <xsl:param name="toc.section.depth">3</xsl:param>
+  <xsl:param name="toc.section.depth">1</xsl:param>
+  <xsl:param name="use.id.function">1</xsl:param>
+  <xsl:param name="use.id.as.filename">1</xsl:param>
   <xsl:template match="programlisting[@language != '']" mode="class.value">programlisting brush: <xsl:value-of select="@language"/></xsl:template>
 </xsl:stylesheet>
