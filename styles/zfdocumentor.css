@@ -334,7 +334,7 @@ body div.colleft div.col2 {
 body div.colleft div.col2 a {
   color: #333;
   text-decoration: none;
-  border-bottom: 1px dotted #ccc;  
+  border-bottom: 1px dotted #ccc;
 }
 
 body div.colleft div.col2 a img {
@@ -409,23 +409,19 @@ body div.colleft div.col1 table a:hover {
 
 }
 
-body div.colleft div.col1 div.part div.titlepage h2.title,
-body div.colleft div.col1 div.chapter div.titlepage h2.title,
-body div.colleft div.col1 div.sect1 div.titlepage h2.title {
+body div.colleft div.col1 div.section h2.title {
   margin: 20px 0px 25px 0px !important;
   font-size: 26px;
   font-weight: normal;
 }
 
-body div.colleft div.col1 div.part p,
-body div.colleft div.col1 div.chapter p,
-body div.colleft div.col1 div.sect1 p {
+body div.colleft div.col1 div.section p {
   line-height: 21px;
   font-size: 14px;
 }
 
-body div.colleft div.col1 div.part div.example, 
-body div.colleft div.col1 div.chapter div.example, 
+body div.colleft div.col1 div.part div.example,
+body div.colleft div.col1 div.chapter div.example,
 body div.colleft div.col1 div.sect1 div.example {
   padding: 5px;
 }
@@ -470,4 +466,7 @@ pre.programlisting {
     border-color: #666666;
     border-style: solid;
     border-width: 1px 4px 4px 1px;
+}
+.classname {
+    font-weight: bold;
 }

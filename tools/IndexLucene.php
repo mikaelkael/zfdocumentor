@@ -25,14 +25,14 @@ class IndexLucene
      */
     public static function makeSearchIndexAction($version = '1.11', $lang = 'en')
     {
-        set_include_path(realpath('/mkk01/zfsvn/standard/trunk/library'));
+        set_include_path(realpath('/mkk01/zf/svn/standard/trunk/library'));
         require_once 'Zend/Search/Lucene.php';
         echo "Building Lucene index for '$lang' manual..." . PHP_EOL;
         chdir(dirname(dirname(__FILE__)));
         self::_removeDir(dirname(dirname(__FILE__)) . '/output/index/' . $version . '/' . $lang);
         self::_createDir(dirname(dirname(__FILE__)) . '/output/index');
         $index = Zend_Search_Lucene::create(dirname(dirname(__FILE__)) . '/output/index/' . $version . '/' . $lang);
-        $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/html/' . $version . '/' . $lang);
+        $dir = new DirectoryIterator(dirname(dirname(__FILE__)) . '/output/website/' . $version . '/' . $lang);
         foreach ($dir as $file) {
             if (substr($file->getFileName(), - 5) == '.html') {
                 echo ' - indexing: ' . $file->getFileName() . '...' . PHP_EOL;

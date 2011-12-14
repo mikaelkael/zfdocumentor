@@ -29,8 +29,6 @@
 # XMLFILE is the name of one DocBook XML file that you want to
 #   test with xmllint, using the 'check1' target.
 
-XEP=@XEP@
-XINC=@XINC@
 FOP=@FOP@
 XSLTPROC=@XSLTPROC@
 XMLLINT=@XMLLINT@
@@ -40,13 +38,6 @@ HHC=@HHC@
 
 # External link (could be set via ENVIRONMENT variable)
 DOCBOOK_DTD=http://framework.zend.com/docbook/xml/4.5/docbookx.dtd
-DOCBOOK_XSL=http://framework.zend.com/docbook-xsl/html/chunk.xsl
-DOCBOOK_XSL_HTMLHELP=http://framework.zend.com/docbook-xsl/htmlhelp/htmlhelp.xsl
-DOCBOOK_FO_XSL=http://framework.zend.com/docbook-xsl/fo/docbook.xsl
-
-HTML_XSL=html.xsl
-HTMLHELP_XSL=htmlhelp.xsl
-PDF_XSL=pdf.xsl
 
 MANUAL_XML=manual.xml
 MANUAL_LINT_XML=manual-lint.xml.in
@@ -91,6 +82,9 @@ $(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/e
 	@php -f scripts/ManualXML.php $(ZF_VERSION)
 	@rm -Rf ./temp/files/
 
+docbook-migration: $(MANUAL_XML)
+	$(XSLTPROC) --xinclude ./tools/db4-upgrade.xsl ./temp/manual.xml > ./temp/manual-db5.xml
+
 rev-svn:
 	@[ -d temp ] || mkdir temp
 	@export LANG=en_US.UTF8
@@ -98,24 +92,19 @@ rev-svn:
 	    || @echo "Impossible to read svn revision"
 
 # Build the docs in HTML format
-website: html highlight zipdoc
+website: html zipdoc
 
-html: $(MANUAL_XML) $(HTML_XSL)
-	@if [ -d output/html/$(ZF_VERSION)/$(ZF_LANG)/ ] ; then \
+html: docbook-migration
+	@if [ -d output/website/$(ZF_VERSION)/$(ZF_LANG)/ ] ; then \
 	    echo "Rendering already done" ; \
 	else \
 	    rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/ ; \
 	    echo "Rendering the whole manual as html..." ; \
-	    $(XSLTPROC) --xinclude --output output/html/$(ZF_VERSION)/$(ZF_LANG)/index.html ./temp/$(HTML_XSL) ./temp/manual.xml ; \
-	    mkdir output/html/$(ZF_VERSION)/$(ZF_LANG)/figures ; \
-	    cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/html/$(ZF_VERSION)/$(ZF_LANG)/figures ; \
+	    ./phd --xinclude --forceindex -f xhtml -P Mkk -o output/website/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml ; \
 	fi
-	@[ -d output/website/$(ZF_VERSION)/$(ZF_LANG) ] || mkdir -p output/website/$(ZF_VERSION)/$(ZF_LANG)
-	@mkdir output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
 	@[ -d output/website/images  ] || mkdir  output/website/images
 	@[ -d output/website/scripts ] || mkdir  output/website/scripts
 	@[ -d output/website/styles  ] || mkdir  output/website/styles
-	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/website/$(ZF_VERSION)/$(ZF_LANG)/figures
 	@cp -f images/*.* output/website/images
 	@cp -f styles/*.* output/website/styles
 	@cp -f javascripts/*.* output/website/scripts
@@ -124,13 +113,16 @@ highlight:
 	@php -f scripts/HighlightHTML.php website $(ZF_VERSION) $(ZF_LANG)
 
 zipdoc:
+	@[ -d docs  ] || mkdir docs
 	@rm -Rf temp/zfdoc
 	@mkdir temp/zfdoc
+	@mkdir  temp/zfdoc/figures
 	@mkdir  temp/zfdoc/images
 	@mkdir  temp/zfdoc/scripts
 	@mkdir  temp/zfdoc/styles
 	@cp -R output/website/$(ZF_VERSION)/$(ZF_LANG)/* temp/zfdoc
-	@cp -R output/html/$(ZF_VERSION)/$(ZF_LANG)/figures/*.* temp/zfdoc/figures
+	@[ -f temp/zfdoc/index.sqlite ] && rm temp/zfdoc/index.sqlite
+	@cp -R output/website/figures/*.* temp/zfdoc/figures
 	@cp -f images/*.* temp/zfdoc/images
 	@cp -f styles/*.* temp/zfdoc/styles
 	@cp -f javascripts/*.* temp/zfdoc/scripts
@@ -142,18 +134,18 @@ zipdoc:
 	@(cd temp ; zip -q -r ../docs/Zend_Framework_$(ZF_VERSION).x_$(ZF_LANG).zip zfdoc)
 
 lucene:
-	@php -f scripts/IndexLucene.php $(ZF_VERSION) $(ZF_LANG)
+	@php -f tools/IndexLucene.php $(ZF_VERSION) $(ZF_LANG)
 
-htmlhelp: $(MANUAL_XML) $(HTMLHELP_XSL)
+htmlhelp: docbook-migration
 	@rm -Rf output/htmlhelp/$(ZF_LANG)/
 	@echo "Rendering the whole manual as htmlhelp..."
-	@$(XSLTPROC) --xinclude --output output/htmlhelp/$(ZF_LANG)/index.html ./temp/$(HTMLHELP_XSL) ./temp/manual.xml
-	@mkdir output/htmlhelp/$(ZF_LANG)/figures
-	@mkdir output/htmlhelp/$(ZF_LANG)/images
-	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/html/$(ZF_LANG)/figures
-	#@cp -f ../standard/trunk/documentation/manual/en/images/*.* output/html/$(ZF_LANG)/images
-	@cp -f styles/*.* output/htmlhelp/$(ZF_LANG)
-	@php -f scripts/HighlightHTML.php htmlhelp/$(ZF_LANG)
+	@[ -d figures ] || mkdir figures
+	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* figures
+	phd -g 'phpdotnet\phd\Highlighter_GeSHi' --xinclude -f xhtml -d ./temp/manual-db5.xml
+	@mkdir -p output/htmlhelp/$(ZF_LANG)/figures
+	@mkdir -p output/htmlhelp/$(ZF_LANG)/images
+	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/htmlhelp/$(ZF_LANG)/figures
+	@cp -f styles/*.* output/htmlhelp/$(ZF_LANG)/
 
 chm: htmlhelp
 #	$(HHC) ./output/htmlhelp/$(ZF_LANG)/htmlhelp.hhp
@@ -175,21 +167,11 @@ html-full:
 	#$(MAKE) -e html ZF_LANG=zh
 	@php -f PrepareMKK.php html/$(ZF_LANG)
 
-$(HTML_XSL): $(HTML_XSL).in
-	@sed -e 's!@DOCBOOK_XSL@!$(DOCBOOK_XSL)!' -e 's!@ZF_LANG@!$(ZF_LANG)!' $< > ./temp/$@
-
-$(HTMLHELP_XSL): $(HTMLHELP_XSL).in
-	@sed -e 's!@DOCBOOK_XSL@!$(DOCBOOK_XSL_HTMLHELP)!' -e 's!@ZF_LANG@!$(ZF_LANG)!' $< > ./temp/$@
-
 # Build the docs in PDF format
 pdf: $(MANUAL_XML) $(PDF_XSL)
 	@$(XSLTPROC) --xinclude --output ./temp/Zend_Framework_$(ZF_LANG).fo ./temp/$(PDF_XSL) ./temp/manual.xml
 	@[ -d output/pdf ] || mkdir output/pdf
 	@php -f scripts/HighlightPDF.php $(ZF_LANG)
-
-pdf-xep: pdf
-	@echo "Rendering the whole manual as pdf with xep..."
-	@"$(XEP)" -fo ./temp/Zend_Framework_$(ZF_LANG).fo -pdf ./output/pdf/Zend_Framework_$(ZF_LANG).pdf
 
 pdf-fop: pdf
 	@echo "Rendering the whole manual as pdf with fop..."
@@ -203,10 +185,6 @@ pdf-full:
 	$(MAKE) -e pdf-fop ZF_LANG=ja
 	#$(MAKE) -e pdf-fop ZF_LANG=ru
 	#$(MAKE) -e pdf-fop ZF_LANG=zh
-
-$(PDF_XSL): $(PDF_XSL).in
-	@sed -e 's!@DOCBOOK_FO_XSL@!$(DOCBOOK_FO_XSL)!' $< > ./temp/$@
-
 
 # checking manual
 check: $(MANUAL_XML)
