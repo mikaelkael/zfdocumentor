@@ -1,6 +1,5 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: ChunkedXHTML.php 309879 2011-04-01 16:00:11Z rquadling $ */
 
 class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
 {
@@ -36,11 +35,13 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
             ),
         )
     );
+    protected $zfOutputDir = null;
 
 
     public function __construct()
     {
         parent::__construct();
+        $this->zfOutputDir = Config::output_dir();
         $this->registerFormatName("Mkk-Chunked-XHTML");
         $this->myelementmap = array_merge(
             parent::getDefaultElementMap(),
@@ -54,7 +55,7 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
 
     public function postConstruct()
     {
-        $this->setOutputDir(Config::output_dir());
+        $this->setOutputDir($this->zfOutputDir);
         parent::postConstruct();
     }
 

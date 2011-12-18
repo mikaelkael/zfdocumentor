@@ -468,5 +468,26 @@ pre.programlisting {
     border-width: 1px 4px 4px 1px;
 }
 .classname {
-    font-weight: bold;
+	background-color: #cff288;
+	color: #006600;
+	border: 1px solid #6eac2c;
+	border-left: 0px;
+	border-right: 0px;
+	padding: 0 3px;
+}
+.methodname {
+	background-color: #fecdcd;
+	color: #800000;
+	border: 1px solid #d24b4b;
+	border-left: 0px;
+	border-right: 0px;
+	padding: 0 3px;
+}
+.filename {
+	background-color: #feeebd;
+	color: #4c3000;
+	border: 1px solid #d19405;
+	border-left: 0px;
+	border-right: 0px;
+	padding: 0 3px;
 }

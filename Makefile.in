@@ -34,7 +34,8 @@ XSLTPROC=@XSLTPROC@
 XMLLINT=@XMLLINT@
 ECSRC=@ECSRC@
 HERE=@HERE@
-HHC=@HHC@
+#HHC=@HHC@
+HHC=wine /home/mikaelkael/.wine/drive_c/htmlhelp/hhc.exe
 
 # External link (could be set via ENVIRONMENT variable)
 DOCBOOK_DTD=http://framework.zend.com/docbook/xml/4.5/docbookx.dtd
@@ -76,14 +77,19 @@ $(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/e
 	@touch ../standard/branches/release-$(ZF_VERSION)/documentation/manual/$(ZF_LANG)/tutorials/to_remove
 	@cp ../standard/branches/release-$(ZF_VERSION)/documentation/manual/$(ZF_LANG)/tutorials/* ./temp/files/tutorials/
 	@find . -wholename './temp/files/*.xml' -print0 | xargs -0 sed --regexp-extended --in-place 's#../../en/module_specs/##g'
-	@php -f scripts/IntegrateExtras.php $(ZF_LANG) $(ZF_VERSION)
+	@php -f tools/IntegrateExtras.php $(ZF_LANG) $(ZF_VERSION)
 	@[ -d output ] || mkdir output
 	@$(XMLLINT) --xinclude --output ./temp/manual.xml ./temp/files/$(MANUAL_XML)
-	@php -f scripts/ManualXML.php $(ZF_VERSION)
+	@php -f tools/ManualXML.php $(ZF_VERSION)
 	@rm -Rf ./temp/files/
 
 docbook-migration: $(MANUAL_XML)
 	$(XSLTPROC) --xinclude ./tools/db4-upgrade.xsl ./temp/manual.xml > ./temp/manual-db5.xml
+
+figures:
+	@[ -d figures  ] || mkdir figures
+	@cp -f ../standard/trunk/documentation/manual/en/figures/*.jpg figures
+	@cp -f ../standard/trunk/documentation/manual/en/figures/*.png figures
 
 rev-svn:
 	@[ -d temp ] || mkdir temp
@@ -94,7 +100,7 @@ rev-svn:
 # Build the docs in HTML format
 website: html zipdoc
 
-html: docbook-migration
+html: docbook-migration figures
 	@if [ -d output/website/$(ZF_VERSION)/$(ZF_LANG)/ ] ; then \
 	    echo "Rendering already done" ; \
 	else \
@@ -102,15 +108,13 @@ html: docbook-migration
 	    echo "Rendering the whole manual as html..." ; \
 	    ./phd --xinclude --forceindex -f xhtml -P Mkk -o output/website/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml ; \
 	fi
+	@[ -f output/website/$(ZF_VERSION)/$(ZF_LANG)/index.sqlite ] && rm output/website/$(ZF_VERSION)/$(ZF_LANG)/index.sqlite
 	@[ -d output/website/images  ] || mkdir  output/website/images
 	@[ -d output/website/scripts ] || mkdir  output/website/scripts
 	@[ -d output/website/styles  ] || mkdir  output/website/styles
 	@cp -f images/*.* output/website/images
 	@cp -f styles/*.* output/website/styles
 	@cp -f javascripts/*.* output/website/scripts
-
-highlight:
-	@php -f scripts/HighlightHTML.php website $(ZF_VERSION) $(ZF_LANG)
 
 zipdoc:
 	@[ -d docs  ] || mkdir docs
@@ -136,55 +140,30 @@ zipdoc:
 lucene:
 	@php -f tools/IndexLucene.php $(ZF_VERSION) $(ZF_LANG)
 
-htmlhelp: docbook-migration
-	@rm -Rf output/htmlhelp/$(ZF_LANG)/
+htmlhelp: docbook-migration figures
+	@rm -Rf output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/
 	@echo "Rendering the whole manual as htmlhelp..."
-	@[ -d figures ] || mkdir figures
-	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* figures
-	phd -g 'phpdotnet\phd\Highlighter_GeSHi' --xinclude -f xhtml -d ./temp/manual-db5.xml
-	@mkdir -p output/htmlhelp/$(ZF_LANG)/figures
-	@mkdir -p output/htmlhelp/$(ZF_LANG)/images
-	@cp -f ../standard/trunk/documentation/manual/en/figures/*.* output/htmlhelp/$(ZF_LANG)/figures
-	@cp -f styles/*.* output/htmlhelp/$(ZF_LANG)/
+	./phd --xinclude --forceindex -f chm -P Mkk -o output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
+	@cp -f figures/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
+	@cp -f images/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
+	@cp -f styles/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
+	@cp -f javascripts/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
+	@(cd output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res; find -name '*.html' -print0 | xargs -0 sed --regexp-extended --in-place 's/src="..\/..\/images\//src="/;s/src="\/images\//src="/;s/href="\/styles\//href="/;s/src="\/scripts\//src="/')
+	@echo '#alternateDoc{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo '.editions{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo '#searchZf{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo 'body div#header{height:60px;background-image:url(zf-logo-45.png)}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo 'div.colleft div.col2 {display:none}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo '.leftmenu .col1 {left: 102%;width: 96%;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
+	@echo '.leftmenu .colleft {right: 100%;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
 
 chm: htmlhelp
-#	$(HHC) ./output/htmlhelp/$(ZF_LANG)/htmlhelp.hhp
-
-chm-full:
-	$(MAKE) -e chm ZF_LANG=en
-	$(MAKE) -e chm ZF_LANG=fr
-	$(MAKE) -e chm ZF_LANG=de
-	$(MAKE) -e chm ZF_LANG=ja
-	#$(MAKE) -e chm ZF_LANG=ru
-	#$(MAKE) -e chm ZF_LANG=zh
-
-html-full:
-	$(MAKE) -e html ZF_LANG=en
-	$(MAKE) -e html ZF_LANG=fr
-	$(MAKE) -e html ZF_LANG=de
-	$(MAKE) -e html ZF_LANG=ja
-	#$(MAKE) -e html ZF_LANG=ru
-	#$(MAKE) -e html ZF_LANG=zh
-	@php -f PrepareMKK.php html/$(ZF_LANG)
+	$(HHC) ./output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/zf.hhp
 
 # Build the docs in PDF format
-pdf: $(MANUAL_XML) $(PDF_XSL)
-	@$(XSLTPROC) --xinclude --output ./temp/Zend_Framework_$(ZF_LANG).fo ./temp/$(PDF_XSL) ./temp/manual.xml
-	@[ -d output/pdf ] || mkdir output/pdf
-	@php -f scripts/HighlightPDF.php $(ZF_LANG)
-
-pdf-fop: pdf
-	@echo "Rendering the whole manual as pdf with fop..."
-	@"$(FOP)" -l fr -c fop.cfg -fo ./temp/Zend_Framework_$(ZF_LANG).fo -pdf ./output/pdf/Zend_Framework_$(ZF_LANG).pdf
-	#@php -f scripts/PostPDF.php $(ZF_LANG)
-
-pdf-full:
-	$(MAKE) -e pdf-fop ZF_LANG=en
-	$(MAKE) -e pdf-fop ZF_LANG=fr
-	$(MAKE) -e pdf-fop ZF_LANG=de
-	$(MAKE) -e pdf-fop ZF_LANG=ja
-	#$(MAKE) -e pdf-fop ZF_LANG=ru
-	#$(MAKE) -e pdf-fop ZF_LANG=zh
+pdf: docbook-migration figures
+	@rm -Rf output/pdf/$(ZF_VERSION)/$(ZF_LANG)/
+	./phd --xinclude --forceindex -f chm -P Mkk -o output/pdf/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
 
 # checking manual
 check: $(MANUAL_XML)
@@ -206,14 +185,6 @@ check1: $(MANUAL_LINT_XML)
 	    @echo "Please specify a filename, e.g. 'make XMLFILE=filename.xml lint'" ; \
 	fi
 
-check-full:
-	$(MAKE) -e check ZF_LANG=en
-	$(MAKE) -e check ZF_LANG=fr
-	$(MAKE) -e check ZF_LANG=de
-	$(MAKE) -e check ZF_LANG=ja
-	#$(MAKE) -e check ZF_LANG=ru
-	#$(MAKE) -e check ZF_LANG=zh
-
 # cleaning
 clean:
 	-rm -Rf ./output/website
@@ -221,9 +192,8 @@ clean:
 
 cleanall: clean
 	-rm -Rf ./output
+	-rm -Rf ./figures
 	-rm -f config.* configure
 	-rm -rf autom4te.cache
 	-rm -f Makefile
 	-rm -f $(HTML_XSL) $(MANUAL_XML)
-
-full: check-full html-full chm-full pdf-full

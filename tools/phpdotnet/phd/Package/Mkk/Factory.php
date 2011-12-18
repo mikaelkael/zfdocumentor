@@ -10,6 +10,8 @@ class Package_Mkk_Factory extends Format_Factory
      */
     private $formats = array(
         'xhtml'         => 'Package_Mkk_ChunkedXHTML',
+        'pdf'           => 'Package_Mkk_PDF',
+        'chm'           => 'Package_Mkk_CHM',
     );
 
     public function __construct()
