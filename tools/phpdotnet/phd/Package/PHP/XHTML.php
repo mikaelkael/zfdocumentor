@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: XHTML.php 311788 2011-06-03 21:47:57Z rquadling $ */
+/* $Id: XHTML.php 313015 2011-07-06 15:51:54Z bjori $ */
 
 abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
     private $myelementmap = array(
@@ -13,9 +13,10 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
         'colophon'              => 'format_chunk',
         'legalnotice'           => 'format_chunk',
         'part'                  => 'format_container_chunk',
+        'partintro'             => 'format_partintro',
         'preface'               => 'format_chunk',
         'phpdoc:classref'       => 'format_class_chunk',
-        'phpdoc:exceptionref'   => 'format_exception_chunk',
+        'phpdoc:exceptionref'   => 'format_class_chunk',
         'phpdoc:varentry'       => 'format_varentry_chunk',
         'refentry'              => 'format_chunk',
         'reference'             => 'format_container_chunk',
@@ -62,7 +63,7 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
                 /* DEFAULT */          'format_suppressed_tags',
                 'fieldsynopsis'     => 'format_fieldsynopsis_varname',
             ),
-        ),
+        ),        
     );
     private $mytextmap = array(
         'acronym'               => 'format_acronym_text',
@@ -90,7 +91,7 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
                 'classsynopsis' => 'format_classsynopsis_methodsynopsis_methodname_text',
             ),
         ),
-        'refname'               => 'format_refname_text',
+        'refname'               => 'format_refname_text', 
         'type'                  => array(
             /* DEFAULT */          'format_type_text',
             'classsynopsisinfo' => false,
@@ -112,7 +113,7 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
                 /* DEFAULT */      false,
                 'classsynopsis' => 'format_classsynopsis_fieldsynopsis_varname_text',
             ),
-        ),
+        ),        
     );
 
     private $versions = array();
@@ -134,12 +135,18 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
         "refname"                      => array(),
     );
 
+    protected $pihandlers = array(
+        'dbhtml'        => 'PI_DBHTMLHandler',
+        'dbtimestamp'   => 'PI_DBHTMLHandler',
+        'phpdoc'        => 'PI_PHPDOCHandler',
+    );
+
     public function __construct() {
-        parent::__construct();
+        parent::__construct();               
         $this->myelementmap = array_merge(parent::getDefaultElementMap(), static::getDefaultElementMap());
         $this->mytextmap = array_merge(parent::getDefaultTextMap(), static::getDefaultTextMap());
         $this->dchunk = array_merge(parent::getDefaultChunkInfo(), static::getDefaultChunkInfo());
-        $this->extraIndexInformation();
+        $this->registerPIHandlers($this->pihandlers);
     }
 
     public function getDefaultElementMap() {
@@ -152,14 +159,6 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
 
     public function getDefaultChunkInfo() {
         return $this->dchunk;
-    }
-
-    public function extraIndexInformation() {
-        $this->addRefname("function.include", "include");
-        $this->addRefname("function.include-once", "include-once");
-        $this->addRefname("function.require", "require");
-        $this->addRefname("function.require-once", "require-once");
-        $this->addRefname("function.return", "return");
     }
 
     public function loadVersionAcronymInfo() {
@@ -234,23 +233,27 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
         return $acronyms;
     }
 
+    public function autogenVersionInfo($refnames, $lang) {
+        $verinfo = null;
+        foreach((array)$refnames as $refname) {
+            $verinfo = $this->versionInfo($refname);
+
+            if ($verinfo) {
+                break;
+            }
+        }
+        if (!$verinfo) {
+            $verinfo = $this->autogen("unknownversion", $lang);
+        }
+
+        $retval = '<p class="verinfo">(' .(htmlspecialchars($verinfo, ENT_QUOTES, "UTF-8")). ')</p>';
+        return $retval;
+    }
     public function format_refpurpose($open, $tag, $attrs, $props) {
         if ($open) {
             $retval = "";
             if ($this->cchunk["verinfo"]) {
-                $verinfo = "";
-                foreach((array)$this->cchunk["refname"] as $refname) {
-                    $verinfo = $this->versionInfo($refname);
-
-                    if ($verinfo) {
-                        break;
-                    }
-                }
-                if (!$verinfo) {
-                    $verinfo = $this->autogen("unknownversion", $props["lang"]);
-                }
-
-                $retval = '<p class="verinfo">(' .(htmlspecialchars($verinfo, ENT_QUOTES, "UTF-8")). ')</p>';
+                $retval = $this->autogenVersionInfo($this->cchunk["refname"], $props["lang"]);
             }
             $refnames = implode('</span> -- <span class="refname">', $this->cchunk["refname"]);
 
@@ -258,6 +261,17 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
             return $retval;
         }
         return "</span></p>\n";
+    }
+    public function format_partintro($open, $tag, $attrs, $props) {
+        if ($open) {
+            $retval = "";
+            if ($this->cchunk["verinfo"]) {
+                $retval = $this->autogenVersionInfo($this->cchunk["phpdoc:classref"], $props["lang"]);
+            }
+            return '<div class="' . $tag . '">' . $retval;
+        }
+
+        return '</div>';
     }
 
     public function format_refname_text($value, $tag) {
@@ -473,10 +487,10 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
 
     public function format_container_chunk($open, $name, $attrs, $props) {
         $this->CURRENT_CHUNK = $this->CURRENT_ID = $id = $attrs[Reader::XMLNS_XML]["id"];
-        if (!isset($attrs[Reader::XMLNS_PHD]["chunk"]) || $attrs[Reader::XMLNS_PHD]["chunk"] == "true") {
+        if (!isset($attrs[Reader::XMLNS_PHD]["chunk"]) || $attrs[Reader::XMLNS_PHD]["chunk"] == "true") {            
             $this->cchunk = $this->dchunk;
         }
-
+        
         if ($open) {
             $this->notify(Render::CHUNK, Render::OPEN);
             if ($name != "reference") {
@@ -570,7 +584,7 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
             }
 
             $this->CURRENT_CHUNK = $this->CURRENT_ID = $id;
-            if (!isset($attrs[Reader::XMLNS_PHD]["chunk"]) || $attrs[Reader::XMLNS_PHD]["chunk"] == "true") {
+            if (!isset($attrs[Reader::XMLNS_PHD]["chunk"]) || $attrs[Reader::XMLNS_PHD]["chunk"] == "true") {            
                 $this->cchunk = $this->dchunk;
                 $this->notify(Render::CHUNK, Render::OPEN);
             }
@@ -614,6 +628,15 @@ abstract class Package_PHP_XHTML extends Package_Generic_XHTML {
     }
 
     public function format_class_chunk($open, $name, $attrs, $props) {
+        if ($open) {
+            $retval = $this->format_container_chunk($open, "reference", $attrs, $props);
+            if (isset($attrs[Reader::XMLNS_DOCBOOK]["role"])) {
+                $this->cchunk["verinfo"] = !($attrs[Reader::XMLNS_DOCBOOK]["role"] == "noversion");
+            } else {
+                $this->cchunk["verinfo"] = true;
+            }
+            return $retval;
+        }
         return $this->format_container_chunk($open, "reference", $attrs, $props);
     }
 

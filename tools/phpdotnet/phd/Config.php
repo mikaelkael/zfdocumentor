@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: Config.php 311551 2011-05-29 15:56:43Z moacir $ */
+/* $Id: Config.php 321113 2011-12-18 11:47:16Z bjori $ */
 
 if (!defined("__INSTALLDIR__")) {
     define("__INSTALLDIR__", "/usr/local/zend/share/pear" == "@"."php_dir@" ? dirname(dirname(__DIR__)) : "/usr/local/zend/share/pear");
@@ -8,7 +8,7 @@ if (!defined("__INSTALLDIR__")) {
 
 class Config
 {
-    const VERSION = '1.1.1';
+    const VERSION = '1.1.2';
 
     private static $optionArrayDefault = array(
         'output_format'     => array(),
@@ -81,10 +81,10 @@ class Config
             // a save configuration. This allows additional options to be added at the
             // command line without them being automatically saved.
             self::$optionArray['saveconfig'] = false;
-
+            
             // As well as the quit option.
             self::$optionArray['quit'] = false;
-
+            
             // Set the error reporting level to the restored level.
             error_reporting($GLOBALS['olderrrep'] | self::$optionArray['verbose']);
         }

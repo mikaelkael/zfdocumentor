@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: Render.php 293170 2010-01-06 08:24:43Z bjori $ */
+/* $Id: Render.php 312946 2011-07-05 18:54:18Z bjori $ */
 
 class Render extends ObjectStorage
 {
@@ -173,7 +173,10 @@ class Render extends ObjectStorage
                 $target = $r->name;
                 $data = $r->value;
                 foreach ($this as $format) {
-                    $format->parsePI($target, $data);
+                    $retval = $format->parsePI($target, $data);
+                    if ($retval) {
+                        $format->appendData($retval);
+                    }
                 }
                 break;
             }

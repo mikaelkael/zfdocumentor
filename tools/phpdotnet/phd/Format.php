@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: Format.php 312232 2011-06-17 10:49:21Z rquadling $ */
+/* $Id: Format.php 315899 2011-08-31 14:46:47Z bjori $ */
 
 abstract class Format extends ObjectStorage
 {
@@ -283,6 +283,12 @@ abstract class Format extends ObjectStorage
     }
     public function addVarname($id, $var) {
         $this->vars[$var] = $id;
+    }
+    public function getRefs() {
+        return $this->refs;
+    }
+    public function getExamples() {
+        return $this->examples;
     }
     public function getRefnameLink($ref) {
         return isset($this->refs[$ref]) ? $this->refs[$ref] : null;

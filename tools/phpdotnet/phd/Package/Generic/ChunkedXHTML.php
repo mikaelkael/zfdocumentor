@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: ChunkedXHTML.php 309879 2011-04-01 16:00:11Z rquadling $ */
+/* $Id: ChunkedXHTML.php 312826 2011-07-02 23:25:55Z moacir $ */
 
 class Package_Generic_ChunkedXHTML extends Package_Generic_XHTML {
     public function __construct() {
@@ -67,6 +67,10 @@ class Package_Generic_ChunkedXHTML extends Package_Generic_XHTML {
             break;
 
         case Render::INIT:
+            if ($this->appendToBuffer) {
+                return; //Don't create output dir when rendering to buffer
+            }
+
             $this->setOutputDir(Config::output_dir() . strtolower($this->getFormatName()) . '/');
             $this->postConstruct();
             if (file_exists($this->getOutputDir())) {

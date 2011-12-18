@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: Handler.php 311551 2011-05-29 15:56:43Z moacir $ */
+/* $Id: Handler.php 315889 2011-08-31 13:17:44Z bjori $ */
 
 class Options_Handler implements Options_Interface
 {
@@ -136,7 +136,9 @@ class Options_Handler implements Options_Interface
         if (is_array($v)) {
             trigger_error("Only a single output location can be supplied", E_USER_ERROR);
         }
-        @mkdir($v, 0777, true);
+        if (!is_dir($v)) {
+            mkdir($v, 0777, true);
+        }
         if (!is_dir($v) || !is_readable($v)) {
             trigger_error(sprintf("'%s' is not a valid directory", $v), E_USER_ERROR);
         }

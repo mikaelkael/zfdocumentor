@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: CHM.php 298508 2010-04-25 14:09:50Z bjori $ */
+/* $Id: CHM.php 312573 2011-06-28 16:23:17Z rquadling $ */
 
 class Package_PEAR_CHM extends Package_PEAR_ChunkedXHTML {
     const DEFAULT_FONT = "Arial,10,0";
@@ -141,7 +141,7 @@ class Package_PEAR_CHM extends Package_PEAR_ChunkedXHTML {
 				   ),
 		"ro"    => array(
 					   "langcode" => "0x418 Romanian",
-					   "preferred_charset" => "Windows-1250",
+					   "preferred_charset" => "ASCII//TRANSLIT//IGNORE",
 					   "mime_charset_name" => "Windows-1250",
 					   "preferred_font" => self::DEFAULT_FONT
 				   ),
@@ -215,12 +215,12 @@ class Package_PEAR_CHM extends Package_PEAR_ChunkedXHTML {
         case Render::INIT:
             $this->chmdir = Config::output_dir() . strtolower($this->getFormatName()) . DIRECTORY_SEPARATOR;
             if(!file_exists($this->chmdir) || is_file($this->chmdir)) {
-                mkdir($this->chmdir) or die("Can't create the CHM project directory");
+                mkdir($this->chmdir, 0777, true) or die("Can't create the CHM project directory");
             }
             $this->outputdir = Config::output_dir() . strtolower($this->getFormatName()) . DIRECTORY_SEPARATOR . "res" . DIRECTORY_SEPARATOR;
             $this->postConstruct();
             if(!file_exists($this->outputdir) || is_file($this->outputdir)) {
-                mkdir($this->outputdir) or die("Can't create the cache directory");
+                mkdir($this->outputdir, 0777, true) or die("Can't create the cache directory");
             }
             $lang = Config::language();
             $this->hhpStream = fopen($this->chmdir . "pear_manual_{$lang}.hhp", "w");

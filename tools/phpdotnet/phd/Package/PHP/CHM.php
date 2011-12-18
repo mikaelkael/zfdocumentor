@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/*  $Id: CHM.php 311888 2011-06-07 11:41:37Z rquadling $ */
+/*  $Id: CHM.php 315934 2011-08-31 21:10:04Z rquadling $ */
 
 class Package_PHP_CHM extends Package_PHP_ChunkedXHTML
 {
@@ -143,7 +143,7 @@ class Package_PHP_CHM extends Package_PHP_ChunkedXHTML
         ),
         "ro"    => array(
             "langcode" => "0x418 Romanian",
-            "preferred_charset" => "Windows-1250",
+            "preferred_charset" => "ASCII//TRANSLIT//IGNORE",
             "mime_charset_name" => "Windows-1250",
             "preferred_font" => self::DEFAULT_FONT
         ),
@@ -247,9 +247,44 @@ class Package_PHP_CHM extends Package_PHP_ChunkedXHTML
                 $stylesheet = $this->fetchStylesheet() . PHP_EOL;
             }
 
-            file_put_contents($this->outputdir . "style.css", $stylesheet . 'body {padding : 3px;}' . PHP_EOL . '#usernotes {margin-left : inherit;}' . PHP_EOL);
-
             self::headerChm();
+
+            // Find referenced content - background images, sprites, etc.
+            if (0 !== preg_match_all('`url\((([\'"]|)((?:(?!file:).)*)\2)\)`', $stylesheet, $stylesheet_urls)) {
+                foreach(array_unique($stylesheet_urls[3]) as $stylesheet_url) {
+
+                    // Parse the url, getting content from http://www.php.net if there is no scheme and host.
+                    if (False !== ($parsed_url = parse_url($stylesheet_url))) {
+
+                        if (!isset($parsed_url['scheme']) && !isset($parsed_url['host'])) {
+                            $url_content = file_get_contents('http://www.php.net/' . $stylesheet_url);
+                        } else {
+                            // Otherwise content is fully identified.
+                            $url_content = file_get_contents($stylesheet_url);
+                        }
+
+                        // Make sure the location to save the content is available.
+                        @mkdir(dirname($content_filename = $this->outputdir . $parsed_url['path']));
+
+                        // Save the referenced content to the new location.
+                        file_put_contents($content_filename, $url_content);
+
+                        // Add the content to the hpp file.
+                        fwrite($this->hhpStream, 'res' . DIRECTORY_SEPARATOR . ($relative_url = trim(substr(realpath($content_filename), strlen(realpath($this->outputdir))), DIRECTORY_SEPARATOR)) . PHP_EOL);
+
+                        // Force URLS to be relative to the "res" directory, but make them use the unix path separator as they will be processed by HTML.
+                        $stylesheet = str_replace($stylesheet_url, str_replace(DIRECTORY_SEPARATOR, '/', $relative_url), $stylesheet);
+
+                        v('Saved content from css : %s.', $parsed_url['path'], VERBOSE_MESSAGES);
+                    } else {
+                        v('Unable to save content from css : %s.', $stylesheet_url, E_USER_WARNING);
+                    }
+                }
+
+            }
+
+            // Save the stylesheet.
+            file_put_contents($this->outputdir . "style.css", $stylesheet . 'body {padding : 3px;}' . PHP_EOL . '#usernotes {margin-left : inherit;}' . PHP_EOL);
             break;
         case Render::VERBOSE:
             parent::update($event, $val);

@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: XHTML.php 310612 2011-04-28 06:06:59Z nikola $ */
+/* $Id: XHTML.php 315898 2011-08-31 14:42:56Z bjori $ */
 
 abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     private $myelementmap = array( /* {{{ */
@@ -16,6 +16,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             'authorgroup'       => 'format_authorgroup_author',
         ),
         'authorgroup'           => 'div',
+        'authorinitials'        => 'format_entry',
         'appendix'              => 'format_container_chunk_top',
         'application'           => 'span',
         'blockquote'            => 'blockquote',
@@ -32,7 +33,10 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         'co'                    => 'format_co',
         'colophon'              => 'format_chunk',
         'copyright'             => 'format_copyright',
-        'date'                  => 'p',
+        'date'                  => array(
+            /* DEFAULT */          'p',
+           'revision'           => 'format_entry', 
+        ),
         'editor'                => 'format_editor',
         'edition'               => 'format_suppressed_tags',
         'email'                 => 'format_suppressed_tags',
@@ -182,6 +186,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         'personblurb'           => 'format_div',
         'phrase'                => 'span',
         'preface'               => 'format_chunk',
+        'printhistory'          => 'format_div',
         'primaryie'             => 'format_suppressed_tags',
         'procedure'             => 'format_procedure',
         'productname'           => 'span',
@@ -206,6 +211,9 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         'refnamediv'            => 'div',
         'releaseinfo'           => 'div',
         'replaceable'           => 'span',
+        'revhistory'            => 'format_table',
+        'revision'              => 'format_row',
+        'revremark'             => 'format_entry',
         'row'                   => 'format_row',
         'screen'                => 'format_screen',
         'screenshot'            => 'format_div',
@@ -273,15 +281,6 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             'formalpara'        => 'h5',
             'info'              => array(
                 /* DEFAULT */      'h1',
-                'section'       => array(
-                    /* DEFAULT */      'h2',
-                    'section'       => array(
-                        /* DEFAULT */      'h3',
-                        'section'       => array(
-                            /* DEFAULT */      'h4',
-                        ),
-                    ),
-                ),
                 'example'       => 'format_example_title',
                 'note'          => 'format_note_title',
                 'table'         => 'format_table_title',
@@ -362,7 +361,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         'contrib'              => 'format_suppressed_text',
         'shortaffil'           => 'format_suppressed_text',
         'edition'              => 'format_suppressed_text',
-
+        
         'programlisting'       => 'format_programlisting_text',
         'screen'               => 'format_screen_text',
         'alt'                  => 'format_alt_text',
@@ -440,7 +439,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         "footnote"                 => array(
         ),
         "tablefootnotes"           => array(
-        ),
+        ),        
         "chunk_id"                 => null,
         "varlistentry"             => array(
             "listitems"                     => array(),
@@ -459,7 +458,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         $this->registerPIHandlers($this->pihandlers);
         $this->setExt(Config::ext() === null ? ".html" : Config::ext());
     }
-
+    
     public function getDefaultElementMap() {
         return $this->myelementmap;
     }
@@ -484,7 +483,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         if ($header) {
             $toc .= $this->getTocHeader($props);
         }
-        $toc .= "<ul class=\"chunklist chunklist_$name\">\n";
+        $toc .= "<ul class=\"chunklist chunklist_$name\">\n"; 
         foreach ($this->getChildren($id) as $child) {
             $isLDesc = null;
             $isSDesc = null;
@@ -510,7 +509,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     {
         return '<strong>' . $this->autogen('toc', $props['lang']) . '</strong>';
     }
-
+    
     /**
     * Handle a <phd:toc> tag.
     */
@@ -556,7 +555,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     protected function fetchStylesheet($name = null) {
         if (!$this->isChunked()) {
             foreach ((array)Config::css() as $css) {
-                if ($style = file_get_contents($css)) {
+                if ($style = file_get_contents($css)) {                
                     $this->stylesheets[] = $style;
                 } else {
                     v("Stylesheet %s not fetched.", $css, E_USER_WARNING);
@@ -588,8 +587,8 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             }
         }
     }
-
-/* Functions format_* */
+ 
+/* Functions format_* */     
     public function format_suppressed_tags($open, $name, $attrs, $props) {
         /* Ignore it */
         return "";
@@ -745,7 +744,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         $this->CURRENT_CHUNK = $id;
         $this->notify(Render::CHUNK, Render::CLOSE);
         $toc = "";
-        if (!in_array($id, $this->TOC_WRITTEN)) {
+        if (!in_array($id, $this->TOC_WRITTEN)) {            
             $toc = $this->createTOC($id, $name, $props);
         }
 
@@ -798,7 +797,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     public function format_section_chunk($open, $name, $attrs, $props) {
         if ($open) {
             if (!isset($attrs[Reader::XMLNS_XML]["id"])) {
-                $this->isSectionChunk[] = false;
+                $this->isSectionChunk[] = false;                
                 return $this->transformFromMap($open, "div", $name, $attrs, $props);
             }
             $this->isSectionChunk[] = true;
@@ -806,7 +805,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         }
         if (array_pop($this->isSectionChunk)) {
             return $this->format_chunk($open, $name, $attrs, $props);
-        }
+        }        
         return $this->transformFromMap($open, "div", $name, $attrs, $props);
     }
     public function format_chunk($open, $name, $attrs, $props) {
@@ -1278,7 +1277,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             return "<b><tt>";
         }
         return "</tt></b>";
-    }
+    }    
     public function admonition_title($title, $lang) {
         return '<b class="' .(strtolower($title)). '">' .($this->autogen($title, $lang)). '</b>';
     }
@@ -1331,7 +1330,8 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             return "";
         }
         if ($open) {
-            return "<p><b>" . ($this->autogen('example', $props['lang']) . ++$this->cchunk["examples"]) . " ";
+            return "<p><b>" . ($this->autogen('example', $props['lang'])
+                . (isset($this->cchunk["examples"]) ? ++$this->cchunk["examples"] : "")) . " ";
         }
         return "</b></p>";
     }
@@ -1387,6 +1387,8 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     public function format_table($open, $name, $attrs, $props) {
         if ($open) {
             $this->cchunk["table"] = true;
+            // Initialize an empty tgroup in case we never process such element
+            Format::tgroup(array());
             $idstr = '';
             if (isset($attrs[Reader::XMLNS_XML]["id"])) {
             	$idstr = ' id="' . $attrs[Reader::XMLNS_XML]["id"] . '"';
@@ -1493,7 +1495,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
             return '<td class="empty">&nbsp;</td>';
         }
         if ($open) {
-            $dbattrs = Format::getColspec($attrs[Reader::XMLNS_DOCBOOK]);
+            $dbattrs = (array)Format::getColspec($attrs[Reader::XMLNS_DOCBOOK]);
 
             $retval = "";
             if (isset($dbattrs["colname"])) {
@@ -1602,7 +1604,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
     public function format_screen_text($value, $tag) {
         return nl2br($this->TEXT($value));
     }
-
+    
     /**
     * Renders  a <tag class=""> tag.
     *
@@ -1629,7 +1631,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
         if ($props['empty']) {
             return '';
         }
-
+        
         $class = 'starttag';
         if (isset($attrs['class'])) {
             $class = $attrs['class'];
@@ -1645,7 +1647,7 @@ abstract class Package_Generic_XHTML extends Format_Abstract_XHTML {
 
         return '<code>' . $arFixes[$class][0];
     }
-
+    
     public function format_dl($open, $name, $attrs, $props) {
         if ($open) {
             return '<dl class="' . $name . '">';

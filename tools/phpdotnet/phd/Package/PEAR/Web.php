@@ -1,6 +1,6 @@
 <?php
 namespace phpdotnet\phd;
-/* $Id: Web.php 302090 2010-08-11 02:49:40Z moacir $ */
+/* $Id: Web.php 310436 2011-04-22 12:43:00Z bjori $ */
 
 /**
  * Renders the pear documentation visible on the PEAR website.
@@ -11,7 +11,7 @@ namespace phpdotnet\phd;
  * @author   Moacir de Oliveira Miranda Júnior <moacir@php.net>
  * @author   Rudy Nappée <loudi@php.net>
  * @license  http://www.opensource.org/licenses/bsd-license.php BSD Style
- * @link     http://doc.php.net/phd/
+ * @link     https://doc.php.net/phd/
  */
 class Package_PEAR_Web extends Package_PEAR_ChunkedXHTML
 {

@@ -405,7 +405,7 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
         parent::__construct();
         $this->myelementmap = array_merge(parent::getDefaultElementMap(), static::getDefaultElementMap());
         $this->mytextmap = array_merge(parent::getDefaultTextMap(), static::getDefaultTextMap());
-        $this->dchunk = array_merge(parent::getDefaultChunkInfo(), static::getDefaultChunkInfo());
+        $this->dchunk = array_merge(parent::getDefaultChunkInfo(), static::getDefaultChunkInfo());    
     }
 
     public function getDefaultElementMap() {
@@ -440,13 +440,13 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
         }
         return '</div>' . $this->restorePara();
     }
-
+    
     public function format_exception_chunk($open, $name, $attrs, $props)
     {
         return $this->format_container_chunk($open, 'reference', $attrs, $props);
     }
 
-
+    
     /**
      * Format a link for an element
      *
@@ -1002,7 +1002,7 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
         return "</td></tr>\n";
     }
 
-    public function format_para($open, $name, $attrs, $props) {
+    public function format_para($open, $name, $attrs, $props) {    
         if ($props['empty']) {
             return '';
         }
@@ -1024,7 +1024,7 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
     }
 
 //Chunk Functions
-
+    
     /**
      * Formatting for the root element of a chunk.
      *
@@ -1062,7 +1062,7 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
             $this->CURRENT_ID = $id = $attrs[Reader::XMLNS_XML]['id'];
         }
 
-        $isChunk = isset($attrs[Reader::XMLNS_PHD]['chunk'])
+        $isChunk = isset($attrs[Reader::XMLNS_PHD]['chunk']) 
                     ? $attrs[Reader::XMLNS_PHD]['chunk'] == "true" : true;
 
         if ($isChunk) {
@@ -1081,13 +1081,13 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
                 $this->cchunk['verinfo'] = true;
             }
         }
-
+                
         if ($name == 'legalnotice') {
             if ($open) {
                 return '<div class="' . $name . '" ' . ($id ? "id=\"{$id}\"" : '') . '>';
             }
         }
-        return $open ? '<div class="'.$name.'" id="'.$id.'">' : "</div>\n";
+        return $open ? '<div class="'.$name.'" id="'.$id.'">' : "</div>\n"; 
     }
 
     public function format_container_chunk($open, $name, $attrs, $props)
@@ -1101,7 +1101,7 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
         }
         $this->CURRENT_ID = $id = $attrs[Reader::XMLNS_XML]['id'];
 
-        $isChunk = isset($attrs[Reader::XMLNS_PHD]['chunk'])
+        $isChunk = isset($attrs[Reader::XMLNS_PHD]['chunk']) 
                     ? $attrs[Reader::XMLNS_PHD]['chunk'] == "true": true;
 
         if ($isChunk) {
@@ -1109,11 +1109,11 @@ abstract class Package_PEAR_XHTML extends Package_Generic_XHTML {
             $this->CURRENT_CHUNK = $id;
             $this->notify(Render::CHUNK, $open ? Render::OPEN : Render::CLOSE);
         }
-
+ 
         if (!$open) {
             return "</div>\n";
         }
-
+ 
         $toc = $this->createTOC(
             $id, $name, $props,
             isset($attrs[Reader::XMLNS_PHD]['toc-depth'])
