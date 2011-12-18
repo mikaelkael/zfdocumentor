@@ -148,7 +148,7 @@ htmlhelp: docbook-migration figures
 	@cp -f images/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
 	@cp -f styles/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
 	@cp -f javascripts/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
-	@(cd output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res; find -name '*.html' -print0 | xargs -0 sed --regexp-extended --in-place 's/src="..\/..\/images\//src="/;s/src="\/images\//src="/;s/href="\/styles\//href="/;s/src="\/scripts\//src="/')
+	@(cd output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res; find -name '*.html' -print0 | xargs -0 sed --regexp-extended --in-place 's/src="..\/..\/figures\//src="/;s/src="..\/..\/images\//src="/;s/src="\/images\//src="/;s/href="\/styles\//href="/;s/src="\/scripts\//src="/')
 	@echo '#alternateDoc{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
 	@echo '.editions{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css
 	@echo '#searchZf{display:none;}' >> output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res/zfdocumentor.css

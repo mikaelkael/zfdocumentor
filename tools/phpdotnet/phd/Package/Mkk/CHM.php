@@ -36,14 +36,14 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "PHP Manualen"
+            "title" => "Zend Framework Manualen"
         ),
         "de"    => array(
             "langcode" => "0x407 German (Germany)",
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "PHP Handbuch",
+            "title" => "Zend Framework Handbuch",
         ),
         "el"    => array(
             "langcode" => "0x408 Greek",
@@ -56,7 +56,7 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "PHP Manual",
+            "title" => "Zend Framework Manual",
         ),
         "es"    => array(
             "langcode" => "0xc0a Spanish (International Sort)",
@@ -75,7 +75,7 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "Manuel PHP"
+            "title" => "Manuel Zend Framework"
         ),
         "fi"    => array(
             "langcode" => "0x40b Finnish",
@@ -100,7 +100,7 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "Manuale PHP",
+            "title" => "Manuale Zend Framework",
         ),
         "ja"    => array(
             "langcode" => "0x411 Japanese",
@@ -131,14 +131,14 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
             "preferred_charset" => "Windows-1250",
             "mime_charset_name" => "Windows-1250",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "Podręcznik PHP",
+            "title" => "Podręcznik Zend Framework",
         ),
         "pt_BR" => array(
             "langcode" => "0x416 Portuguese (Brazil)",
             "preferred_charset" => "Windows-1252",
             "mime_charset_name" => "Windows-1252",
             "preferred_font" => self::DEFAULT_FONT,
-            "title" => "Manual do PHP",
+            "title" => "Manual do Zend Framework",
         ),
         "ro"    => array(
             "langcode" => "0x418 Romanian",
@@ -299,20 +299,12 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
 
             $this->currentTocDepth++;
             fwrite($this->hhpStream, "{$ref}\n");
-            fwrite($this->hhcStream, "{$this->offset(1)}<LI><OBJECT type=\"text/sitemap\">\n" .
-                "{$this->offset(3)}<param name=\"Name\" value=\"" . $name . "\">\n" .
-                "{$this->offset(3)}<param name=\"Local\" value=\"{$ref}\">\n" .
-                "{$this->offset(2)}</OBJECT>\n");
-            if ($hasChild) fwrite($this->hhcStream, "{$this->offset(2)}<ul>\n");
             fwrite($this->hhkStream,
                 "      <LI><OBJECT type=\"text/sitemap\">\n" .
                 "        <param name=\"Local\" value=\"{$ref}\">\n" .
                 "        <param name=\"Name\" value=\"" . self::cleanIndexName($name) . "\">\n" .
                 "      </OBJECT>\n");
         } elseif ($this->flags & Render::CLOSE) {
-            if ($hasChild) {
-                fwrite($this->hhcStream, "{$this->offset(2)}</ul>\n");
-            }
             $this->currentTocDepth--;
         }
     }
@@ -385,12 +377,73 @@ res/zfdocumentor.css
     }
 
     protected function footerChm() {
+        fwrite($this->hhcStream, $this->generateHhc());
         fwrite($this->hhcStream, "    </ul>\n" .
             "  </body>\n" .
             "</html>\n");
         fwrite($this->hhkStream, "    </ul>\n" .
             "  </body>\n" .
             "</html>\n");
+    }
+
+    public function generateHhc()
+    {
+        $initialTree = null;
+        // Generate initial tree on three levels
+        if ($initialTree === null) {
+            $firstLevel = $this->getChildren('manual');
+            foreach ($firstLevel as $fL) {
+                $link = $this->createLink($fL, $desc);
+                $initialTree[$fL]['link'] = $link;
+                $initialTree[$fL]['desc'] = $desc;
+                $initialTree[$fL]['pages'] = array();
+                $secondLevel = $this->getChildren($fL);
+                if (is_array($secondLevel)) {
+                    foreach ($secondLevel as $sL) {
+                        $link = $this->createLink($sL, $desc);
+                        $initialTree[$fL]['pages'][$sL]['link'] = $link;
+                        $initialTree[$fL]['pages'][$sL]['desc'] = $desc;
+                        $initialTree[$fL]['pages'][$sL]['pages'] = array();
+                        $thirdLevel = $this->getChildren($sL);
+                        if (is_array($thirdLevel)) {
+                            foreach ($thirdLevel as $tL) {
+                                $link = $this->createLink($tL, $desc);
+                                $initialTree[$fL]['pages'][$sL]['pages'][$tL]['link'] = $link;
+                                $initialTree[$fL]['pages'][$sL]['pages'][$tL]['desc'] = $desc;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Render the tree
+        $hhc = '';
+        foreach ($initialTree as $firstId => $firstLevel) {
+            $hhc .= "\t\t<LI><OBJECT type=\"text/sitemap\">\n" .
+                    "\t\t\t<param name=\"Name\" value=\"{$firstLevel['desc']}\">\n" .
+                    "\t\t\t<param name=\"Local\" value=\"res/{$firstLevel['link']}\">\n" .
+                    "\t\t</OBJECT></LI>\n";
+            $hhc .= "\t\t<UL>\n";
+            foreach ($firstLevel['pages'] as $secondId => $secondLevel) {
+                $hhc .= "\t\t\t<LI><OBJECT type=\"text/sitemap\">\n" .
+                        "\t\t\t\t<param name=\"Name\" value=\"{$secondLevel['desc']}\">\n" .
+                        "\t\t\t\t<param name=\"Local\" value=\"res/{$secondLevel['link']}\">\n" .
+                        "\t\t\t</OBJECT></LI>\n";
+                if (count($secondLevel)) {
+                    $hhc .= "\t\t<UL>\n";
+                    foreach ($secondLevel['pages'] as $thirdId => $thirdLevel) {
+                        $hhc .= "\t\t\t\t<LI><OBJECT type=\"text/sitemap\">\n" .
+                                "\t\t\t\t\t<param name=\"Name\" value=\"{$thirdLevel['desc']}\">\n" .
+                                "\t\t\t\t\t<param name=\"Local\" value=\"res/{$thirdLevel['link']}\">\n" .
+                                "\t\t\t\t</OBJECT></LI>\n";
+                    }
+                    $hhc .= "\t\t</UL>\n";
+                }
+            }
+            $hhc .= "\t\t</UL>\n";
+        }
+        return $hhc;
     }
 
     public function appendData($data) {

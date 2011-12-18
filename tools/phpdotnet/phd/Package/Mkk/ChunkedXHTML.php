@@ -6,6 +6,7 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
 
     private $minorZf = '1.11';
     private $revisionZf = '1.11.11';
+    private $revisionSvn = 24783;
 
     private $myelementmap = array();
     private $replaceElementMap = array(
@@ -209,7 +210,7 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
   </div>
 </div>
 <div id="footer">
-  <p><a href="appendixes.copyright.html">Copyright</a> &copy; 2005-2010 <a href="http://zend.com/"> Zend Technologies Inc</a> (compiled by <a href="http://mikaelkael.fr">mikaelkael</a> with <a href="https://github.com/mikaelkael/zfdocumentor">ZFDocumentor</a> - SVN {revsvn}).</p>
+  <p><a href="appendixes.copyright.html">Copyright</a> &copy; 2005-2011 <a href="http://zend.com/"> Zend Technologies Inc</a> (compiled by <a href="http://mikaelkael.fr">mikaelkael</a> with <a href="https://github.com/mikaelkael/zfdocumentor">ZFDocumentor</a> - SVN ' . $this->revisionSvn . ').</p>
 </div>
 <script src="/scripts/jquery-1.4.4.min.js"></script>
 <script type="text/javascript" src="/scripts/zfdocumentor.js"></script>
