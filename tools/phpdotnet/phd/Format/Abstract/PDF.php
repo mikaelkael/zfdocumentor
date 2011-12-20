@@ -4,7 +4,7 @@ namespace phpdotnet\phd;
 
 abstract class Format_Abstract_PDF extends Format {
     protected $pdfDoc;
-   
+
     public function getPdfDoc() {
         return $this->pdfDoc;
     }
@@ -46,6 +46,8 @@ class PdfWriter {
     const FONT_VERBATIM = 0x04;
     const FONT_VERBATIM_ITALIC = 0x05;
     const FONT_MANUAL = 0x06;
+    const FONT_VERBATIM_BOLD = 0x07;
+    const FONT_VERBATIM_BOLDITALIC = 0x08;
 
     // "Objects" constants (for add())
     const PARA = 0x10;
@@ -151,7 +153,9 @@ class PdfWriter {
     	$this->fonts["Helvetica-Bold"] = $this->haruDoc->getFont("Helvetica-Bold", "WinAnsiEncoding");
     	$this->fonts["Helvetica-Oblique"] = $this->haruDoc->getFont("Helvetica-Oblique", "WinAnsiEncoding");
     	$this->fonts["Courier"] = $this->haruDoc->getFont("Courier", "WinAnsiEncoding");
+    	$this->fonts["Courier-Bold"] = $this->haruDoc->getFont("Courier-Bold", "WinAnsiEncoding");
     	$this->fonts["Courier-Oblique"] = $this->haruDoc->getFont("Courier-Oblique", "WinAnsiEncoding");
+    	$this->fonts["Courier-BoldOblique"] = $this->haruDoc->getFont("Courier-BoldOblique", "WinAnsiEncoding");
 
     	// Add first page and default font settings
     	$this->currentFont = $this->fonts["Helvetica"];
@@ -454,8 +458,16 @@ class PdfWriter {
                 $this->currentPage->setFontAndSize($this->currentFont = $this->fonts["Courier"],
                     $this->currentFontSize);
                 break;
+            case self::FONT_VERBATIM_BOLD:
+                $this->currentPage->setFontAndSize($this->currentFont = $this->fonts["Courier-Bold"],
+                    $this->currentFontSize);
+                break;
             case self::FONT_VERBATIM_ITALIC:
                 $this->currentPage->setFontAndSize($this->currentFont = $this->fonts["Courier-Oblique"],
+                    $this->currentFontSize);
+                break;
+            case self::FONT_VERBATIM_BOLDITALIC:
+                $this->currentPage->setFontAndSize($this->currentFont = $this->fonts["Courier-BoldOblique"],
                     $this->currentFontSize);
                 break;
             case self::FONT_MANUAL:

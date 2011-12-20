@@ -14,7 +14,8 @@ class Package_Mkk_PDF extends Package_Generic_PDF
             'part'              => 'format_tocnode_newpage',
         ),
         'callout'               => 'format_collect_id',
-        'chapter'               => 'format_tocnode_newpage',        
+        'chapter'               => 'format_tocnode_newpage',
+        'classname'             => 'format_verbatim_inline',
         'co'                    => 'format_collect_id',
         'colophon'              => 'format_tocnode_newpage',
         'footnote'              => 'format_collect_id',
@@ -24,12 +25,14 @@ class Package_Mkk_PDF extends Package_Generic_PDF
             'book'              => 'format_tocnode_newpage',
             'part'              => 'format_tocnode_newpage',
         ),
+        'important'             => 'format_admonition',
         'index'                 => array(
             /* DEFAULT */          'format_suppressed_tags',
             'article'           => 'format_tocnode_newpage',
             'book'              => 'format_tocnode_newpage',
             'part'              => 'format_tocnode_newpage',
         ),
+        'interface'             => 'format_verbatim_inline',
         'legalnotice'           => 'format_tocnode_newpage',
         'part'                  => 'format_tocnode_newpage',
         'phpdoc:exceptionref'   => 'format_tocnode_exception',
@@ -38,12 +41,6 @@ class Package_Mkk_PDF extends Package_Generic_PDF
         'refentry'              => 'format_tocnode_newpage',
         'reference'             => 'format_tocnode_newpage',
         'phpdoc:varentry'       => 'format_tocnode_newpage',
-        'sect1'                 => 'format_tocnode',
-        'sect2'                 => 'format_tocnode',
-        'sect3'                 => 'format_tocnode',
-        'sect4'                 => 'format_tocnode',
-        'sect5'                 => 'format_tocnode',
-        'section'               => 'format_tocnode',
         'set'                   => array(
             /* DEFAULT */          'format_root_set',
             'set'               => 'format_set',
@@ -79,6 +76,8 @@ class Package_Mkk_PDF extends Package_Generic_PDF
 
 
     );
+
+    protected $role = false;
 
     private   $acronyms = array();
 
@@ -120,7 +119,7 @@ class Package_Mkk_PDF extends Package_Generic_PDF
 
         case Render::INIT:
             if (!class_exists("HaruDoc")) die ("PDF output needs libharu & haru/pecl extensions... Please install them and start PhD again.\n");
-            $this->setOutputDir(Config::output_dir() . strtolower($this->getFormatName()) . DIRECTORY_SEPARATOR);
+            $this->setOutputDir(Config::output_dir());
             if(!file_exists($this->getOutputDir()) || is_file($this->getOutputDir())) mkdir($this->getOutputDir()) or die("Can't create the cache directory.\n");
             break;
         case Render::VERBOSE:
@@ -166,7 +165,7 @@ class Package_Mkk_PDF extends Package_Generic_PDF
             $this->resolveLinks($this->cchunk["bookname"]);
             $pdfDoc = parent::getPdfDoc();
             v("Writing PDF Manual (%s)", $this->cchunk["bookname"], VERBOSE_TOC_WRITING);
-            $pdfDoc->saveToFile($this->getOutputDir() . $this->toValidName($this->cchunk["bookname"]) . "." . $this->getExt());
+            $pdfDoc->saveToFile($this->getOutputDir() . '../../Zend_Framework_' . $this->minorZf . '.x_' . strtoupper($this->lang)  . $this->getExt());
             unset($pdfDoc);
         }
         return false;
@@ -318,5 +317,93 @@ class Package_Mkk_PDF extends Package_Generic_PDF
                 $this->setIdToPage($id);
         }
         return false;
+    }
+
+    public function format_verbatim_block($open, $name, $attrs, $props) {
+        if ($open) {
+            $this->cchunk["verbatim-block"] = true;
+            $this->pdfDoc->add(PdfWriter::VERBATIM_BLOCK);
+            if (isset($attrs[Reader::XMLNS_DOCBOOK]["language"])) {
+                $this->role = $attrs[Reader::XMLNS_DOCBOOK]["language"];
+            } else {
+                $this->role = false;
+            }
+        } else {
+            $this->pdfDoc->add(PdfWriter::LINE_JUMP);
+            $this->pdfDoc->revertFont();
+            $this->cchunk["verbatim-block"] = false;
+            $this->role = false;
+        }
+        return "";
+    }
+
+    public function TEXT($str) {
+        static $i = 0;
+        if (isset($this->cchunk["refsection"]) && $this->cchunk["refsection"]) // DUMMY REFSECTION DELETION
+            return "";
+
+        if (isset($this->cchunk["verbatim-block"]) && $this->cchunk["verbatim-block"]) {
+            //$str = $this->highlight(trim($str), $this->role, 'xhtml');
+            $language = array_search($this->role, array('sh'  => 'shell',
+                                                        'ini' => 'dosini',
+                                                        'js'  => 'javascript'));
+            $language = $language ? $language : $this->role;
+            exec('echo "' . str_replace(array('"', '$'), array('\"', '\$'), $str) . "\" | highlight --inline-css -f --syntax $language", $highlight);
+            $highlight = array_slice($highlight, 1, count($highlight) - 2);
+            foreach ($highlight as $line) {
+                $line = str_replace(array('&gt;', '&lt;', '&quot;'), array('>', '<', '"'), $line);
+                while (strpos($line, '<span') !== false) {
+                    $pos = strpos($line, '<span');
+                    if ($pos == 0) {
+                        $last = strpos($line, '</span>') + 7;
+                        $text = substr($line, 0, $last);
+                        preg_match('#<span style="(.*)">(.*)</span>#', $text, $matches);
+                        $styles = explode(';', $matches[1]);
+                        $format = array();
+                        foreach ($styles as $s) {
+                            $f = explode(':', $s);
+                            $format[trim($f[0])] = trim($f[1]);
+                        }
+                        if (isset($format['color'])) {
+                            $colors = array(hexdec(substr($format['color'], 1, 2)) / 255,
+                                            hexdec(substr($format['color'], 3, 2)) / 255,
+                                            hexdec(substr($format['color'], 5, 2)) / 255);
+                        } else {
+                            $colors = array(0, 0, 0);
+                        }
+                        $font = PdfWriter::FONT_VERBATIM;
+                        if (isset($format['font-weight']) && isset($format['font-style'])) {
+                            $font = PdfWriter::FONT_VERBATIM_BOLDITALIC;
+                        } else {
+                            if (isset($format['font-weight'])) {
+                                $font = PdfWriter::FONT_VERBATIM_BOLD;
+                            }
+                            if (isset($format['font-style'])) {
+                                $font = PdfWriter::FONT_VERBATIM_ITALIC;
+                            }
+                        }
+                        $this->pdfDoc->setFont($font, null, $colors);
+                        $this->pdfDoc->appendText(utf8_decode($matches[2]));
+                        $this->pdfDoc->revertFont();
+                        $line = substr($line, $last);
+                    } else {
+                        $this->pdfDoc->appendText(utf8_decode(substr($line, 0, $pos)));
+                        $line = substr($line, $pos);
+                    }
+                }
+                if (strlen($line)) {
+                    $this->pdfDoc->appendText(utf8_decode($line));
+                }
+                $this->pdfDoc->add(PdfWriter::PARA);
+            }
+            return "";
+        }
+
+        $ret = utf8_decode(trim(preg_replace('/[ \n\t]+/', ' ', $str)));
+        // No whitespace if current text value begins with ',', ';', ':', '.'
+        if (strncmp($ret, ",", 1) && strncmp($ret, ";", 1) && strncmp($ret, ":", 1) && strncmp($ret, ".", 1))
+            $this->pdfDoc->appendText(" " . $ret);
+        else $this->pdfDoc->appendText($ret);
+        return "";
     }
 }

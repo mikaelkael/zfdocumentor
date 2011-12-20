@@ -299,7 +299,7 @@ abstract class Package_Generic_PDF extends Format_Abstract_PDF {
     public function __construct() {
         parent::__construct();
         $this->setExt(Config::ext() === null ? ".pdf" : Config::ext());
-        $this->pdfDoc = new PdfWriter(); 
+        $this->pdfDoc = new PdfWriter();
     }
 
     public function __destruct() {
@@ -510,7 +510,7 @@ abstract class Package_Generic_PDF extends Format_Abstract_PDF {
 
     public function format_verbatim_inline($open, $name, $attrs, $props) {
         if ($open) {
-            $this->pdfDoc->setFont(PdfWriter::FONT_VERBATIM, 10);
+            $this->pdfDoc->setFont(PdfWriter::FONT_VERBATIM, 12);
         } else {
             $this->pdfDoc->revertFont();
         }

@@ -41,9 +41,9 @@ class IndexLucene
                 $index->addDocument($doc);
             }
         }
-        echo ' - optimisation...';
+        echo ' - optimisation...' . PHP_EOL;
         $index->optimize();
-        echo "Index is created and optimized.";
+        echo "Index is created and optimized." . PHP_EOL;
     }
     
     /**

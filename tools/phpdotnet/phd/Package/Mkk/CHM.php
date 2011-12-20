@@ -332,7 +332,7 @@ class Package_Mkk_CHM extends Package_Mkk_ChunkedXHTML
         fwrite($this->hhpStream, '[OPTIONS]
 Binary TOC=Yes
 Compatibility=1.1 or later
-Compiled file=zf.chm
+Compiled file=../../Zend_Framework_' . $this->minorZf . '.x_' . strtoupper($this->lang)  . '.chm
 Contents file=zf.hhc
 Default Font=' . ($this->LANGUAGES[$lang]["preferred_font"] ? $this->LANGUAGES[$lang]["preferred_font"] : self::DEFAULT_FONT). '
 Default topic=res' . DIRECTORY_SEPARATOR . 'manual.html

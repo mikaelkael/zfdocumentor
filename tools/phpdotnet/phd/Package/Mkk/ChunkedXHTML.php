@@ -4,9 +4,9 @@ namespace phpdotnet\phd;
 class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
 {
 
-    private $minorZf = '1.11';
-    private $revisionZf = '1.11.11';
-    private $revisionSvn = 24783;
+    protected $minorZf = null;
+    protected $revisionZf = null;
+    protected $revisionSvn = null;
 
     private $myelementmap = array();
     private $replaceElementMap = array(
@@ -41,6 +41,10 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
 
     public function __construct()
     {
+        // Read ZF version
+        $this->revisionSvn = file_get_contents('temp/svn_rev');
+        $this->revisionZf = file_get_contents('temp/zf_version');
+        $this->minorZf = implode('.', array_slice(explode('.', $this->revisionZf), 0, 2));
         parent::__construct();
         $this->zfOutputDir = Config::output_dir();
         $this->registerFormatName("Mkk-Chunked-XHTML");
@@ -79,10 +83,10 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
             $tag = '<pre class="programlisting';
             if (isset($attrs[Reader::XMLNS_DOCBOOK]["language"])) {
                 $this->role = $attrs[Reader::XMLNS_DOCBOOK]["language"];
-                $tag .= ' brush: ' . $this->role;
             } else {
-                $this->role = false;
+                $this->role = 'php';
             }
+            $tag .= ' brush: ' . $this->role;
 
             $tag .= '">';
             return $tag;
@@ -166,9 +170,9 @@ class Package_Mkk_ChunkedXHTML extends Package_Generic_ChunkedXHTML
   </form>
 
   <div id="alternateDoc" style="position: absolute;top: 10px; right:10px;">
-    <a href="/docs/Zend_Framework_{shortVersion}.x_{lang}.zip"><img src="/images/zip.png" alt="Downloadable version of this documentation" title="Downloadable version of this documentation" /></a>
-    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.pdf"><img src="/images/pdf.png" alt="PDF version of this documentation" title="PDF version of this documentation" /></a>
-    <a style="{alternateDoc}" href="/docs/Zend_Framework_{shortVersion}.x_{LANG}.chm"><img src="/images/chm.png" alt="CHM version of this documentation" title="CHM version of this documentation" /></a>
+    <a href="/docs/Zend_Framework_' . $this->revisionZf . '.x_' . strtoupper($this->lang)  . '.zip"><img src="/images/zip.png" alt="Downloadable version of this documentation" title="Downloadable version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_' . $this->revisionZf . '.x_' . strtoupper($this->lang)  . '.pdf"><img src="/images/pdf.png" alt="PDF version of this documentation" title="PDF version of this documentation" /></a>
+    <a style="{alternateDoc}" href="/docs/Zend_Framework_' . $this->revisionZf . '.x_' . strtoupper($this->lang)  . '.chm"><img src="/images/chm.png" alt="CHM version of this documentation" title="CHM version of this documentation" /></a>
   </div>
 
   <ul class="editions">

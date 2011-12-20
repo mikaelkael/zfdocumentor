@@ -49,9 +49,9 @@ ZF_LANG=en
 ZF_VERSION=1.11
 
 # "make" or "make -e"
-all:	$(MANUAL_XML) htmlhelp
+all: html
 
-$(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/en/$(MANUAL_XML).in rev-svn
+$(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/en/$(MANUAL_XML).in rev-svn version-zf
 	@echo "Creating temporary manual and preprocessing it..."
 	@rm -Rf ./temp/files/
 	@rm -Rf ./temp/en/
@@ -83,6 +83,11 @@ $(MANUAL_XML): ../standard/branches/release-$(ZF_VERSION)/documentation/manual/e
 	@php -f tools/ManualXML.php $(ZF_VERSION)
 	@rm -Rf ./temp/files/
 
+test:
+	@[ -d temp ] || mkdir temp
+	echo $(ZF_LANG) | tr [:lower:] [:upper:] > temp/lang
+	echo "toto" > temp/`cat temp/lang`
+
 docbook-migration: $(MANUAL_XML)
 	$(XSLTPROC) --xinclude ./tools/db4-upgrade.xsl ./temp/manual.xml > ./temp/manual-db5.xml
 
@@ -94,20 +99,19 @@ figures:
 rev-svn:
 	@[ -d temp ] || mkdir temp
 	@export LANG=en_US.UTF8
-	@svn info ../standard/branches/release-$(ZF_VERSION)/documentation/manual/$(ZF_LANG) | grep '^Last Changed Rev' | sed -e 's!Last Changed Rev: !!m' -e 's!(\n)!!' > ./temp/svn_rev \
+	@svn info ../standard/branches/release-$(ZF_VERSION)/documentation/manual/$(ZF_LANG) | grep '^Last Changed Rev' | sed -e 's!Last Changed Rev: !!m' | tr -d '\n'> ./temp/svn_rev \
 	    || @echo "Impossible to read svn revision"
+
+version-zf:
+	@[ -d temp ] || mkdir temp
+	@php -r "include_once '../standard/branches/release-$(ZF_VERSION)/library/Zend/Version.php'; echo Zend_Version::VERSION;" > ./temp/zf_version
 
 # Build the docs in HTML format
 website: html zipdoc
 
 html: docbook-migration figures
-	@if [ -d output/website/$(ZF_VERSION)/$(ZF_LANG)/ ] ; then \
-	    echo "Rendering already done" ; \
-	else \
-	    rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/ ; \
-	    echo "Rendering the whole manual as html..." ; \
-	    ./phd --xinclude --forceindex -f xhtml -P Mkk -o output/website/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml ; \
-	fi
+	@rm -Rf output/website/$(ZF_VERSION)/$(ZF_LANG)/
+	@./phd --xinclude --forceindex -f xhtml -P Mkk -L $(ZF_LANG) -o output/website/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
 	@[ -f output/website/$(ZF_VERSION)/$(ZF_LANG)/index.sqlite ] && rm output/website/$(ZF_VERSION)/$(ZF_LANG)/index.sqlite
 	@[ -d output/website/images  ] || mkdir  output/website/images
 	@[ -d output/website/scripts ] || mkdir  output/website/scripts
@@ -125,7 +129,6 @@ zipdoc:
 	@mkdir  temp/zfdoc/scripts
 	@mkdir  temp/zfdoc/styles
 	@cp -R output/website/$(ZF_VERSION)/$(ZF_LANG)/* temp/zfdoc
-	@[ -f temp/zfdoc/index.sqlite ] && rm temp/zfdoc/index.sqlite
 	@cp -R output/website/figures/*.* temp/zfdoc/figures
 	@cp -f images/*.* temp/zfdoc/images
 	@cp -f styles/*.* temp/zfdoc/styles
@@ -135,15 +138,14 @@ zipdoc:
 	@echo '.editions{display:none;}' >> temp/zfdoc/styles/zfdocumentor.css
 	@echo '#searchZf{display:none;}' >> temp/zfdoc/styles/zfdocumentor.css
 	@echo '#header{height:60px;}' >> temp/zfdoc/styles/zfdocumentor.css
-	@(cd temp ; zip -q -r ../docs/Zend_Framework_$(ZF_VERSION).x_$(ZF_LANG).zip zfdoc)
+	@(cd temp ; zip -q -r ../docs/Zend_Framework_$(ZF_VERSION).x_`echo $(ZF_LANG) | tr [:lower:] [:upper:]`.zip zfdoc)
 
 lucene:
 	@php -f tools/IndexLucene.php $(ZF_VERSION) $(ZF_LANG)
 
 htmlhelp: docbook-migration figures
 	@rm -Rf output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/
-	@echo "Rendering the whole manual as htmlhelp..."
-	./phd --xinclude --forceindex -f chm -P Mkk -o output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
+	@./phd --xinclude --forceindex -f chm -P Mkk -L $(ZF_LANG) -o output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
 	@cp -f figures/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
 	@cp -f images/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
 	@cp -f styles/*.* output/htmlhelp/$(ZF_VERSION)/$(ZF_LANG)/res
@@ -163,7 +165,7 @@ chm: htmlhelp
 # Build the docs in PDF format
 pdf: docbook-migration figures
 	@rm -Rf output/pdf/$(ZF_VERSION)/$(ZF_LANG)/
-	./phd --xinclude --forceindex -f chm -P Mkk -o output/pdf/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
+	@./phd --xinclude --forceindex -g 'phpdotnet\phd\Highlighter_GeSHi' -f pdf -P Mkk -L $(ZF_LANG) -o output/pdf/$(ZF_VERSION)/$(ZF_LANG) -d ./temp/manual-db5.xml
 
 # checking manual
 check: $(MANUAL_XML)
@@ -193,6 +195,7 @@ clean:
 cleanall: clean
 	-rm -Rf ./output
 	-rm -Rf ./figures
+	-rm -Rf ./docs
 	-rm -f config.* configure
 	-rm -rf autom4te.cache
 	-rm -f Makefile
